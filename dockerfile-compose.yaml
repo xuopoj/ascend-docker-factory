@@ -1,0 +1,207 @@
+version: "1.0"
+
+images:
+  # ================= Base Images =================
+  python-3.10:
+    build:
+      context: .
+      dockerfile: dockerfiles/python.dockerfile
+      args:
+        PYTHON_VERSION: "3.10"
+        BASE_IMAGE: "ubuntu:22.04"
+    tags:
+      - "xuopoj/python:3.10"
+
+  python-3.12:
+    build:
+      context: .
+      dockerfile: dockerfiles/python.dockerfile
+      args:
+        PYTHON_VERSION: "3.12"
+        BASE_IMAGE: "ubuntu:22.04"
+    tags:
+      - "xuopoj/python:3.12"
+
+  # ================= Machine Learning Images =================
+  ml-basic:
+    depends_on:
+      - python-3.10
+    build:
+      context: .
+      dockerfile: dockerfiles/ml-basic.dockerfile
+      args:
+        BASE_IMAGE: "xuopoj/python:3.10"
+    tags:
+      - "xuopoj/ml-basic:latest"
+
+  # ================= PyTorch Images =================
+  pytorch-cpu:
+    depends_on:
+      - python-3.10
+    build:
+      context: .
+      dockerfile: dockerfiles/pytorch-cpu.dockerfile
+      args:
+        BASE_IMAGE: "xuopoj/python:3.10"
+        TORCH_VERSION: "2.7.1"
+        TORCH_VARIANT: "cpu"
+    tags:
+      - "xuopoj/pytorch:2.7.1-cpu"
+
+  # ================= CANN Images =================
+  cann-8.2rc1-910b:
+    depends_on:
+      - python-3.10
+    build:
+      context: .
+      dockerfile: dockerfiles/cann.dockerfile
+      args:
+        BASE_IMAGE: "xuopoj/python:3.10"
+        CANN_VERSION: "8.2.RC1"
+        CHIP_TYPE: "910b"
+        DRIVER_VERSION: "24.1.1"
+        INSTALL_COMPONENTS: "toolkit,kernels,nnal"
+    tags:
+      - "xuopoj/cann:8.2rc1-910b"
+
+  cann-8.3rc1-910b:
+    depends_on:
+      - python-3.10
+    build:
+      context: .
+      dockerfile: dockerfiles/cann.dockerfile
+      args:
+        BASE_IMAGE: "xuopoj/python:3.10"
+        CANN_VERSION: "8.3.RC1"
+        CHIP_TYPE: "910b"
+        DRIVER_VERSION: "24.1.1"
+        INSTALL_COMPONENTS: "toolkit,kernels,nnal"
+    tags:
+      - "xuopoj/cann:8.3rc1-910b"
+
+  cann-8.2rc1-310p:
+    depends_on:
+      - python-3.10
+    build:
+      context: .
+      dockerfile: dockerfiles/cann.dockerfile
+      args:
+        BASE_IMAGE: "xuopoj/python:3.10"
+        CANN_VERSION: "8.2.RC1"
+        CHIP_TYPE: "310p"
+        DRIVER_VERSION: "24.1.1"
+        INSTALL_COMPONENTS: "toolkit,kernels"
+    tags:
+      - "xuopoj/cann:8.2rc1-310p"
+
+  pytorch-npu-910b:
+    depends_on:
+      - cann-8.3rc1-910b
+    build:
+      context: .
+      dockerfile: dockerfiles/pytorch-npu.dockerfile
+      args:
+        BASE_IMAGE: "xuopoj/cann:8.3rc1-910b"
+        TORCH_VERSION: "2.5.1"
+        TORCH_NPU_VERSION: "2.5.1"
+    tags:
+      - "xuopoj/pytorch:2.5.1-npu-910b"
+
+  pytorch-npu-310p:
+    depends_on:
+      - cann-8.2rc1-310p
+    build:
+      context: .
+      dockerfile: dockerfiles/pytorch-npu.dockerfile
+      args:
+        BASE_IMAGE: "xuopoj/cann:8.2rc1-310p"
+        TORCH_VERSION: "2.5.1"
+        TORCH_NPU_VERSION: "2.5.1"
+    tags:
+      - "xuopoj/pytorch:2.5.1-npu-310p"
+
+  # ================= Applications =================
+  yolo-cpu:
+    depends_on:
+      - pytorch-cpu
+    build:
+      context: .
+      dockerfile: dockerfiles/yolo.dockerfile
+      args:
+        BASE_IMAGE: "xuopoj/pytorch:2.5.1-cpu"
+    tags:
+      - "xuopoj/yolo:v11-cpu"
+
+  yolo-910b:
+    depends_on:
+      - pytorch-npu-910b
+    build:
+      context: .
+      dockerfile: dockerfiles/yolo.dockerfile
+      args:
+        BASE_IMAGE: "xuopoj/pytorch:2.5.1-npu-910b"
+    tags:
+      - "xuopoj/yolo:v11-npu-910b"
+
+  yolo-310p:
+    depends_on:
+      - pytorch-npu-310p
+    build:
+      context: .
+      dockerfile: dockerfiles/yolo.dockerfile
+      args:
+        BASE_IMAGE: "xuopoj/pytorch:2.5.1-npu-310p"
+    tags:
+      - "xuopoj/yolo:v11-npu-310p"
+
+  flask-api:
+    depends_on:
+      - python-3.10
+    build:
+      context: .
+      dockerfile: dockerfiles/flask.dockerfile
+      args:
+        BASE_IMAGE: "xuopoj/python:3.10-ubuntu22.04"
+    tags:
+      - "xuopoj/flask-api:latest"
+
+  ascend-vllm:
+    build:
+      context: .
+      dockerfile: dockerfiles/vllm.dockerfile
+      args:
+        BASE_IMAGE: "v0.11.0rc2"
+    tags:
+      - "xuopoj/ascend-vllm:v0.11.0rc2"
+  msit-msmodelslim:
+    depends_on:
+      - pytorch-npu-910b
+    build:
+      context: .
+      dockerfile: dockerfiles/msit-msmodelslim.dockerfile
+      args:
+        BASE_IMAGE: "xuopoj/pytorch:2.5.1-npu-910b"
+    tags:
+      - "xuopoj/msit-msmodelslim:latest-npu-910b"
+
+  chronos-forecasting-cpu:
+    depends_on:
+      - pytorch-cpu
+    build:
+      context: .
+      dockerfile: dockerfiles/chronos-forecasting.dockerfile
+      args:
+        BASE_IMAGE: "xuopoj/pytorch:2.7.1-cpu"
+    tags:
+      - "xuopoj/chronos-forecasting:latest-cpu"
+
+  chronos-forecasting-npu:
+    depends_on:
+      - pytorch-npu-910b
+    build:
+      context: .
+      dockerfile: dockerfiles/chronos-forecasting.dockerfile
+      args:
+        BASE_IMAGE: "xuopoj/pytorch:2.5.1-npu-910b"
+    tags:
+      - "xuopoj/chronos-forecasting:latest-npu"

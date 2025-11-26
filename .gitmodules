@@ -1,0 +1,12 @@
+[submodule "projects/ultralytics"]
+	path = projects/ultralytics
+	url = https://github.com/xuopoj/ultralytics.git
+[submodule "projects/minimind"]
+	path = projects/minimind
+	url = https://github.com/xuopoj/minimind.git
+[submodule "projects/Falcon-TST"]
+	path = projects/Falcon-TST
+	url = https://github.com/xuopoj/Falcon-TST.git
+[submodule "projects/chronos-forecasting"]
+	path = projects/chronos-forecasting
+	url = https://github.com/amazon-science/chronos-forecasting.git
