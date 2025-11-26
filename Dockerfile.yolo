@@ -1,0 +1,21 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+USER ma-user
+WORKDIR /home/ma-user/
+
+RUN git clone https://github.com/xuopoj/ultralytics
+
+WORKDIR /home/ma-user/ultralytics
+
+
+RUN pip install -e . --no-deps -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple --default-timeout=600 && \
+    pip install matplotlib>=3.3.0 pillow>=7.1.2 pyyaml>=5.3.1 requests>=2.23.0 \
+    torchvision==0.20 psutil polars ultralytics-thop>=2.0.18 \
+    -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple --default-timeout=600
+
+
+RUN pip uninstall -y opencv-python opencv-python-headless || true && \
+    pip install opencv-python-headless numpy==1.26.4 torch==2.5.1
+
+COPY --chown=ma-user:users projects/yolo yolo/

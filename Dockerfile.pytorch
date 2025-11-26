@@ -1,0 +1,19 @@
+ARG BASE_IMAGE=xuopoj/cann:8.2rc1-910b
+FROM ${BASE_IMAGE}
+
+ARG TORCH_VERSION
+ARG TORCH_NPU_VERSION
+
+# COPY packages/torch_npu-*.whl /opt/install/
+# Install Python packages
+RUN pip install --no-cache-dir attrs cython numpy==1.26.4 decorator sympy cffi pyyaml \
+    pathlib2 psutil protobuf==3.20 scipy requests absl-py pyyaml wheel typing_extensions \
+    tensorboard matplotlib onnxruntime-cann ipykernel -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple --default-timeout=600
+
+# install pytorch
+RUN pip install --no-cache-dir torch==${TORCH_VERSION} torch_npu==${TORCH_NPU_VERSION} -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple --default-timeout=600
+
+RUN useradd -m -d /home/ma-user -s /bin/bash -g 100 -u 1000 ma-user
+USER ma-user
+WORKDIR /home/ma-user
+

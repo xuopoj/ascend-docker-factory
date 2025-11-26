@@ -1,0 +1,28 @@
+FROM quay.io/ascend/vllm-ascend:v0.9.1 AS vllm-ascend
+
+RUN apt-get update && apt-get install -y curl
+
+RUN useradd -m -d /home/ma-user -s /bin/bash -g 100 -u 1000 ma-user
+USER ma-user
+WORKDIR /home/ma-user
+
+FROM vllm-ascend AS msmodelslim
+
+RUN git clone https://gitee.com/ascend/msit
+# Optional, this commit has been verified
+
+WORKDIR /home/ma-user/msit
+
+RUN git checkout f8ab35a772a6c1ee7675368a2aa4bafba3bedd1a
+
+WORKDIR /home/ma-user/msit/msmodelslim
+RUN bash install.sh && \
+    pip install accelerate -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+
+
+FROM vllm-ascend AS vllm-benchmark
+
+USER ma-user
+RUN pip install aiohttp numpy
+
+COPY --chown=ma-user:users llm_benchmark/ llm_benchmark/

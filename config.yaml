@@ -1,0 +1,75 @@
+# ================= Level 1: CANN Bases (Hardware & Driver Aware) =================
+cann_bases:
+  # Scene: 910B Training Cluster
+  - id: "cann8.3.rc1-910b"
+    chip: "910b"
+    driver_version: "24.1.1"
+    cann_version: "8.3.RC1"
+    install_components: toolkit,kernels,nnal
+    tag_suffix: "8.2rc1-910b"
+    description: "Ascend 910B Training Base"
+
+  # Scene: 910B Training Cluster
+  - id: "cann8.2.rc1-910b"
+    chip: "910b"
+    driver_version: "24.1.1"
+    local_package_path: "/Users/sean/projects/service-delivery-hub/ascend-docker-factory/packages"
+    cann_version: "8.2.RC1"
+    install_components: toolkit,kernels,nnal
+    tag_suffix: "8.2rc1-910b"
+    description: "Ascend 910B Training Base"
+
+  # Scene: 310P Edge Inference
+  - id: "cann8.2.rc1-310p"
+    chip: "310p"
+    driver_version: "24.1.1"
+    cann_version: "8.2.RC1"
+    install_components: toolkit,kernels
+    tag_suffix: "8.2rc1-310p"
+    description: "Ascend 310P Edge Base"
+
+# ================= Level 2: PyTorch Layers =================
+pytorch_layers:
+  # PyTorch 2.5.1 for 910B
+  - id: "pt2.5.1-910b"
+    base_cann_id: "cann8.2.rc1-910b"
+    torch_version: "2.5.1"
+    torch_npu_version: "2.5.1"
+
+  # PyTorch 2.5.1 for 310P 
+  - id: "pt2.5.1-310p"
+    base_cann_id: "cann8.2.rc1-310p"
+    torch_version: "2.5.1"
+    torch_npu_version: "2.5.1"
+
+# ================= Level 3: Workloads (Application Routing) =================
+applications:
+  - id: "yolo-910b"
+    type: "source"
+    app_tag: v11
+    base_pt_id: "pt2.5.1-910b"
+    dockerfile: Dockerfile.yolo
+
+  - id: "llama-factory-910b"
+    type: "source" 
+    base_pt_id: "pt2.1-910b"
+    git_repo: "https://github.com/hiyouga/LLaMA-Factory.git"
+    git_branch: "main"
+    extra_pip: "deepspeed_npu"
+    app_tag: "latest"
+
+  # [Type: Pip] YOLOv8 for CV
+  - id: "yolo-310p"
+    type: "pip"
+    base_pt_id: "pt1.11-310p"
+    pip_packages: ["ultralytics", "opencv-python-headless"]
+    app_tag: "v8"
+
+
+  # [Type: Compiler] vLLM for High-Perf Inference
+  - id: "vllm-910b"
+    type: "compiler"
+    base_pt_id: "pt2.1-910b"
+    git_repo: "https://gitee.com/ascend/vllm.git"
+    git_branch: "v0.4.0-ascend"
+    app_tag: "v0.4.0"
