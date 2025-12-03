@@ -317,7 +317,7 @@ docker push  swr.cn-global-1.cloud.nisco.cn/test-modelarts/minimind:v2
 ### 其他使用场景
 
 * [使用ModelArts进行训推指南](./how-to-train-or-infer-with-ma.md) // TODO
-* [ModelArts Studio三方模型注册与基础训推] // TODO
+* [ModelArts Studio三方模型注册与基础训推](../ma-studio-3rd/README.md) // TODO
 
 ## 附录
 
