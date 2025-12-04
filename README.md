@@ -24,9 +24,9 @@ private: false
 
 如果构建一个大而全的镜像，试图覆盖所有的基础依赖，场景依赖是行不通的，这样会导致dockerfile会很大，很难维护，镜像也会很大，而且可能会有依赖版本冲突。那怎么解决这种问题呢？
 
-### 镜像分层构建
+### 镜像分级构建
 
-将镜像分为如下几层：
+将镜像分为如下几个层级：
 * 基础镜像，包括基础库、常用工具、python环境等；
 * cann镜像，包括训练推理中可能用到包，包括toolkits（和nnae二选一），kernels，nnal（大模型场景）等；
 * pytorch镜像，包括pytorch和npu扩展包pytorch-npu；
@@ -221,6 +221,10 @@ docker push swr.cloud.com/org1/python:3.10
     tags:
       - "xuopoj/cann:8.2rc1-910b"
 ```
+
+CANN相关的包（包括tookit, nnae, kernels, nnal等，具体下载哪些包，可以参考[ascend-cann体系组成](#ascend-cann体系组成)）需要提前下载，并将安装包放到工程根目录的packges目录下，以版本号组织。
+
+![cann placement](./assets/cann.png)
 
 命令
 ```bash
