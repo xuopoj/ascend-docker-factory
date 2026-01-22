@@ -1,0 +1,190 @@
+version: "1.0"
+
+# =============================================================================
+# Ascend Docker Factory - Base and Framework Images
+# =============================================================================
+# This file contains ONLY base and framework-level images:
+#   - Base: Python, Ubuntu
+#   - Framework: CANN, PyTorch, ML libraries
+#   - Inference Runtimes: vLLM
+#   - Framework-level tools: msit-msmodelslim
+#
+# App-specific images (YOLO, Flask, Chronos, etc.) are in projects/ directory.
+# See README.md for building app-specific images.
+# =============================================================================
+
+images:
+  # ================= Base Images =================
+  python-3.10:
+    build:
+      context: .
+      dockerfile: dockerfiles/python.dockerfile
+      args:
+        PYTHON_VERSION: "3.10"
+        BASE_IMAGE: "ubuntu:22.04"
+        PIP_INDEX_URL: "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple"
+        INCLUDE_DEBUG_TOOLS: "true"
+    tags:
+      - "python:3.10"
+  
+  python-3.11:
+    build:
+      context: .
+      dockerfile: dockerfiles/python.dockerfile
+      args:
+        PYTHON_VERSION: "3.11"
+        BASE_IMAGE: "ubuntu:22.04"
+        PIP_INDEX_URL: "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple"
+        INCLUDE_DEBUG_TOOLS: "true"
+    tags:
+      - "python:3.11"
+  # ================= Machine Learning Images =================
+  ml-basic:
+    purpose: training  # training, inference, or both
+    app_type: ml-basic
+    app_name: "ML Basic"
+    description: "Scikit-learn, XGBoost, traditional ML algorithms"
+    depends_on:
+      - python-3.10
+    build:
+      context: .
+      dockerfile: dockerfiles/ml-basic.dockerfile
+      args:
+        BASE_IMAGE: "python:3.10"
+    tags:
+      - "ml-basic:latest"
+
+  # ================= PyTorch Images =================
+  pytorch-cpu:
+    purpose: both
+    app_type: pytorch
+    app_name: "PyTorch Base"
+    description: "General-purpose deep learning framework"
+    depends_on:
+      - python-3.10
+    build:
+      context: .
+      dockerfile: dockerfiles/pytorch-cpu.dockerfile
+      args:
+        BASE_IMAGE: "python:3.10"
+        TORCH_VERSION: "2.7.1"
+        TORCH_VARIANT: "cpu"
+    tags:
+      - "pytorch:2.7.1-cpu"
+
+  # ================= CANN Images =================
+  cann-8.2rc1-910b:
+    depends_on:
+      - python-3.10
+    build:
+      context: .
+      dockerfile: dockerfiles/cann.dockerfile
+      args:
+        BASE_IMAGE: "python:3.10"
+        CANN_VERSION: "8.2.RC1"
+        CHIP_TYPE: "910b"
+        DRIVER_VERSION: "24.1.1"
+        INSTALL_COMPONENTS: "toolkit,kernels,nnal"
+    tags:
+      - "cann:8.2rc1-910b"
+
+  cann-8.3rc1-910b:
+    depends_on:
+      - python-3.10
+    build:
+      context: .
+      dockerfile: dockerfiles/cann.dockerfile
+      args:
+        BASE_IMAGE: "python:3.10"
+        CANN_VERSION: "8.3.RC1"
+        CHIP_TYPE: "910b"
+        DRIVER_VERSION: "24.1.1"
+        INSTALL_COMPONENTS: "toolkit,nnae,kernels,nnal"
+    tags:
+      - "cann:8.3rc1-910b"
+
+  cann-8.2rc1-310p:
+    depends_on:
+      - python-3.10
+    build:
+      context: .
+      dockerfile: dockerfiles/cann.dockerfile
+      args:
+        BASE_IMAGE: "python:3.10"
+        CANN_VERSION: "8.2.RC1"
+        CHIP_TYPE: "310p"
+        DRIVER_VERSION: "24.1.1"
+        INSTALL_COMPONENTS: "toolkit,kernels"
+    tags:
+      - "cann:8.2rc1-310p"
+
+  pytorch-npu-910b:
+    purpose: training
+    app_type: pytorch
+    app_name: "PyTorch Base"
+    description: "General deep learning framework with NPU acceleration (910B)"
+    depends_on:
+      - cann-8.3rc1-910b
+    build:
+      context: .
+      dockerfile: dockerfiles/pytorch-npu.dockerfile
+      args:
+        BASE_IMAGE: "cann:83rc1-python310"
+        TORCH_VERSION: "2.5.1"
+        TORCH_NPU_VERSION: "2.5.1"
+        TORCHVISION_VERSION: "0.20.1"
+    tags:
+      - "pytorch:2.5.1-npu-910b"
+
+  pytorch-npu-310p:
+    purpose: inference
+    app_type: pytorch
+    app_name: "PyTorch Base"
+    description: "General deep learning framework with NPU acceleration (310P)"
+    depends_on:
+      - cann-8.2rc1-310p
+    build:
+      context: .
+      dockerfile: dockerfiles/pytorch-npu.dockerfile
+      args:
+        BASE_IMAGE: "cann:8.2rc1-310p"
+        TORCH_VERSION: "2.5.1"
+        TORCH_NPU_VERSION: "2.5.1"
+        TORCHVISION_VERSION: "0.20.1"
+    tags:
+      - "pytorch:2.5.1-npu-310p"
+
+  # ================= Inference Runtimes =================
+  ascend-vllm:
+    purpose: inference
+    app_type: vllm
+    app_name: "vLLM Runtime"
+    description: "High-performance LLM inference framework"
+    standalone: true
+    build:
+      context: .
+      dockerfile: dockerfiles/vllm.dockerfile
+      args:
+        BASE_IMAGE: "v0.11.0rc2"
+        INCLUDE_DEBUG_TOOLS: "true"
+    tags:
+      - "ascend-vllm:v0.11.0rc2"
+
+  # ================= Framework-Level Tools =================
+  # Note: App-specific images (YOLO, Flask, Chronos, etc.) should be built
+  # manually from projects/ directory. See README.md for examples.
+
+  msmodelslim:
+    purpose: training
+    app_type: msmodelslim
+    app_name: "MSModelSlim"
+    description: "Model compression and pruning toolkit"
+    depends_on:
+      - pytorch-npu-910b
+    build:
+      context: .
+      dockerfile: dockerfiles/msmodelslim.dockerfile
+      args:
+        BASE_IMAGE: "pytorch:2.5.1-npu-910b"
+    tags:
+      - "msmodelslim:latest-npu-910b"

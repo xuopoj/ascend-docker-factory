@@ -1,0 +1,13 @@
+[project]
+name = "ascend-docker-factory"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "pyyaml>=6.0.2",
+    "typer>=0.21.1",
+]
+
+[tool.uv]
+package = false
