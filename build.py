@@ -61,26 +61,53 @@ def get_build_order(config, target=None):
     
     return order
 
-def build_image(image_name, image_config):
+def resolve_base_image(image_name, image_config, all_images):
+    """Resolve BASE_IMAGE from depends_on if not explicitly specified."""
+    build_config = image_config.get('build', {})
+    args = build_config.get('args', {})
+
+    # If BASE_IMAGE is explicitly set, use it
+    if 'BASE_IMAGE' in args:
+        return args['BASE_IMAGE']
+
+    # If there's exactly one dependency, use its first tag as BASE_IMAGE
+    deps = image_config.get('depends_on', [])
+    if len(deps) == 1:
+        dep_name = deps[0]
+        dep_config = all_images.get(dep_name, {})
+        dep_tags = dep_config.get('tags', [])
+        if dep_tags:
+            return dep_tags[0]
+
+    return None
+
+def build_image(image_name, image_config, all_images):
     print(f"\n📦 Building {image_name}")
-    
+
     build_config = image_config['build']
     dockerfile = build_config['dockerfile']
     context = build_config.get('context', '.')
-    
+
     # Get the primary tag (first one in the list)
     primary_tag = image_config.get('tags', [f"temp_{image_name}"])[0]
-    
+
     # Build directly with the final tag
     cmd_parts = [
         f"docker build",
         f"-f {dockerfile}",
         f"-t {primary_tag}",
     ]
-    
-    # Add build args
+
+    # Resolve BASE_IMAGE from depends_on if not explicitly set
+    resolved_base = resolve_base_image(image_name, image_config, all_images)
+    if resolved_base:
+        cmd_parts.append(f"--build-arg BASE_IMAGE={resolved_base}")
+
+    # Add build args (skip BASE_IMAGE if we already resolved it)
     if 'args' in build_config:
         for key, value in build_config['args'].items():
+            if key == 'BASE_IMAGE' and resolved_base:
+                continue
             cmd_parts.append(f"--build-arg {key}={value}")
     
     cmd_parts.append(context)
@@ -171,7 +198,7 @@ def main():
     print(f"🚀 Build order: {' -> '.join(build_order)}")
     
     for image_name in build_order:
-        build_image(image_name, config['images'][image_name])
+        build_image(image_name, config['images'][image_name], config['images'])
     
     print("✅ All builds completed!")
 

@@ -49,8 +49,6 @@ images:
     build:
       context: .
       dockerfile: dockerfiles/ml-basic.dockerfile
-      args:
-        BASE_IMAGE: "python:3.10"
     tags:
       - "ml-basic:latest"
 
@@ -66,7 +64,6 @@ images:
       context: .
       dockerfile: dockerfiles/pytorch-cpu.dockerfile
       args:
-        BASE_IMAGE: "python:3.10"
         TORCH_VERSION: "2.7.1"
         TORCH_VARIANT: "cpu"
     tags:
@@ -80,7 +77,6 @@ images:
       context: .
       dockerfile: dockerfiles/cann.dockerfile
       args:
-        BASE_IMAGE: "python:3.10"
         CANN_VERSION: "8.2.RC1"
         CHIP_TYPE: "910b"
         DRIVER_VERSION: "24.1.1"
@@ -95,7 +91,6 @@ images:
       context: .
       dockerfile: dockerfiles/cann.dockerfile
       args:
-        BASE_IMAGE: "python:3.10"
         CANN_VERSION: "8.3.RC1"
         CHIP_TYPE: "910b"
         DRIVER_VERSION: "24.1.1"
@@ -110,7 +105,6 @@ images:
       context: .
       dockerfile: dockerfiles/cann.dockerfile
       args:
-        BASE_IMAGE: "python:3.10"
         CANN_VERSION: "8.2.RC1"
         CHIP_TYPE: "310p"
         DRIVER_VERSION: "24.1.1"
@@ -129,7 +123,6 @@ images:
       context: .
       dockerfile: dockerfiles/pytorch-npu.dockerfile
       args:
-        BASE_IMAGE: "cann:83rc1-python310"
         TORCH_VERSION: "2.5.1"
         TORCH_NPU_VERSION: "2.5.1"
         TORCHVISION_VERSION: "0.20.1"
@@ -147,7 +140,6 @@ images:
       context: .
       dockerfile: dockerfiles/pytorch-npu.dockerfile
       args:
-        BASE_IMAGE: "cann:8.2rc1-310p"
         TORCH_VERSION: "2.5.1"
         TORCH_NPU_VERSION: "2.5.1"
         TORCHVISION_VERSION: "0.20.1"
@@ -184,7 +176,5 @@ images:
     build:
       context: .
       dockerfile: dockerfiles/msmodelslim.dockerfile
-      args:
-        BASE_IMAGE: "pytorch:2.5.1-npu-910b"
     tags:
       - "msmodelslim:latest-npu-910b"
