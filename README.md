@@ -12,10 +12,10 @@ roles: ["secret"]
 
 1. 窄版本：比如 `pytorch-npu 2.5.1` 依赖 `cann 8.2.rc1`，`pytorch-npu 2.7.1` 依赖 `cann 8.3.rc1`，底层的`numpy`只能是 `1.x`;
 2. 场景多：
-    - 传统训练场景：比如cnn（yolo等）；
-    - 大模型训练场景：依赖（nnal等大模型训练加速包）；
-    - 传统推理场景：直接使用pytorch或transformers推理
     - 大模型推理场景：使用vllm-ascend等推理框架
+    - 传统训练场景：比如cnn（yolo等）
+    - 传统推理场景：直接使用pytorch或transformers推理
+    - 大模型训练场景：依赖（nnal等大模型训练加速包）
     - cpu训练推理场景
     - 其他框架训推场景
 3. 依赖arm环境，且构建中不能验证镜像是否可用。
@@ -29,27 +29,25 @@ roles: ["secret"]
 将镜像分为如下几个层级：
 * 基础镜像：包括基础库、常用工具、python环境、cann镜像，包括训练推理中可能用到包，包括toolkits（和nnae二选一），kernels，nnal（大模型场景）等；
 * 训练框架镜像：比如pytorch镜像，包括pytorch和npu扩展包pytorch-npu，或者mindspore等其他训练镜像；
-* 场景镜像：面向不同的模型的训推场景都使用自己的镜像，安装所需依赖，保证镜像简洁可维护。
+* 场景镜像：面向不同的模型的训推场景都使用独立的镜像，安装所需依赖，保证镜像简洁可维护。
 
 ### 构建基础镜像
+
+[service-delivery-hub](https://blog.service-delivery-hub.com/dockerfile-generator) 提供了一个常用镜像dockerfile的生成功能，可以根据自己的使用场景下载对应的dockerfile和构建命令，在本地完成构建。
 
 1. 访问[Dockerfile 生成器](https://blog.service-delivery-hub.com/dockerfile-generator)，根据实际需求生成对应的Dockerfile和构建命令；
 2. 下载CANN组件：[CANN资源下载](https://www.hiascend.com/developer/download/community/result)，注意选择匹配的版本，CPU架构选择AArch64， 软件包格式选择run，组件包参考[ascend-cann体系组成](#ascend-cann体系组成)下载所需的安装包；并把下载的包放到packages/8.x.x(根据实际的版本确定)目录下；
 3. 完成构建。
 
 ```bash
-docker build -t swr.cloud.com/orginization/pytorch:2.7.1-cann83rc1-910b-python3.10 .
+docker build -t swr.sdh.com/orginization/pytorch:2.7.1-cann83rc1-910b-python3.10 .
 ```
-
-### 基础扩展能力（TODO）
-
-支持在运行时安装依赖（当前仅支持pip依赖），避免重新构建镜像，可选方式：
-1. 挂载外部存储，安装挂载的依赖文件；
-2. 使用私有registry。
 
 ## 介绍一下 `ascend-docker-factory`
 
-> 如果仅关心镜像构建，当前节的内容可忽略。
+除了使用[构建基础镜像](#构建基础镜像)提供的dockerfile模型，还可以使用`ascend-docker-factory`提供的镜像构建能力，基于这个库可以支持更自定义的使用方式。
+
+[Dockerfile 生成器](https://blog.service-delivery-hub.com/dockerfile-generator)中的模版即从此项目生成。
 
 ### 下载
 
@@ -268,7 +266,7 @@ docker push swr.cloud.com/pytorch:2.5.1-npu-910b
 
 #### 构建vLLM推理框架
 
-配置文件，vLLM作为推理框架，使用外部基础镜像
+配置文件，vLLM作为推理框架，使用外部基础镜像。
 
 ```yaml
   ascend-vllm:
@@ -306,18 +304,18 @@ docker push swr.cloud.com/org1/ascend-vllm:v0.11.0rc2
 SWR服务中获取登录命令
 
 ```bash
-docker login -u <u> -p <p> swr.cn-global-1.cloud.nisco.cn
+docker login -u <u> -p <p> swr.sdh.com
 ```
 
 ### tag
 
 ```bash
-docker tag minimind:v2 swr.cn-global-1.cloud.nisco.cn/test-modelarts/minimind:v2
+docker tag minimind:v2 swr.sdh.com/test-modelarts/minimind:v2
 ```
 
 ### push
 ```bash
-docker push  swr.cn-global-1.cloud.nisco.cn/test-modelarts/minimind:v2
+docker push  swr.sdh.com/test-modelarts/minimind:v2
 ```
 
 ### 其他使用场景
@@ -325,7 +323,11 @@ docker push  swr.cn-global-1.cloud.nisco.cn/test-modelarts/minimind:v2
 * [使用ModelArts进行训推指南](./how-to-train-or-infer-with-ma.md) // TODO
 * [ModelArts Studio三方模型注册与基础训推](../ma-studio-3rd/README.md) // TODO
 
+
+
 ## 迁移项目
+
+基于上述提供的基础镜像，可以完成场景镜像的构建和适配，目前已在如下项目完成了验证。
 
 ### Minimind
 
@@ -338,8 +340,6 @@ TODO
 ### Falcon-TST
 
 TODO
-
-
 
 
 ## 附录
