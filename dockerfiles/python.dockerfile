@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=UTC
 
 # Install essential system dependencies and Python
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y \
     software-properties-common \
     zsh \
     wget \
@@ -76,9 +76,9 @@ RUN pip install --no-cache-dir \
 
 WORKDIR /home/ma-user
 
-RUN pip install --no-cache-dir jupyter_core==5.3.0 jupyter_client==8.2.0 ipython==8.10.0 ipykernel==6.23.1
+RUN pip install --no-cache-dir jupyter_core==5.7.2 jupyter_client==8.6.3 ipython==8.10.0 ipykernel==6.29.5
 
-RUN python3 -m ipykernel install --user --name "python3.10" && \
-    rm -r /home/ma-user/.local/share/jupyter/kernels/python3.10/logo-*
+RUN python3 -m ipykernel install --user --name "python${PYTHON_VERSION}" && \
+    rm -r /home/ma-user/.local/share/jupyter/kernels/python${PYTHON_VERSION}/logo-*
 
 CMD ["python"]

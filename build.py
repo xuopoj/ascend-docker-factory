@@ -4,6 +4,9 @@ import subprocess
 import sys
 import argparse
 import os
+import copy
+import json
+from datetime import datetime, timezone
 from pathlib import Path
 import re
 
@@ -16,9 +19,32 @@ def run_command(cmd):
         print("❌ Build failed!")
         sys.exit(1)
 
+def expand_matrix(config):
+    """Expand matrix entries into individual image configs."""
+    images = config['images']
+    expanded = {}
+    for name, image_config in images.items():
+        matrix = image_config.pop('matrix', None)
+        if not matrix:
+            expanded[name] = image_config
+            continue
+        # Currently supports a single matrix variable
+        var, values = next(iter(matrix.items()))
+        for value in values:
+            instance_name = f"{name}-{value}"
+            instance = copy.deepcopy(image_config)
+            # Inject matrix var as build arg
+            instance.setdefault('build', {}).setdefault('args', {})[var] = value
+            # Substitute {VAR} in tags
+            instance['tags'] = [t.replace(f"{{{var}}}", value) for t in instance.get('tags', [])]
+            expanded[instance_name] = instance
+    config['images'] = expanded
+    return config
+
 def load_images_config():
     with open("dockerfile-compose.yaml", "r") as f:
-        return yaml.safe_load(f)
+        config = yaml.safe_load(f)
+    return expand_matrix(config)
 
 def get_build_order(config, target=None):
     """Calculate build order based on dependencies"""
@@ -80,6 +106,56 @@ def resolve_base_image(image_name, image_config, all_images):
             return dep_tags[0]
 
     return None
+
+def rc_tag(tag, rc):
+    """Convert a tag to its RC variant: repo/image:ver → repo/image:ver-rc1"""
+    if ":" in tag:
+        repo, version = tag.rsplit(":", 1)
+        return f"{repo}:{version}-{rc}"
+    return f"{tag}-{rc}"
+
+def write_catalog_entry(image_name, image_config, all_images):
+    catalog_dir = Path("catalog")
+    catalog_dir.mkdir(exist_ok=True)
+
+    build_config = image_config.get('build', {})
+    dockerfile_path = build_config.get('dockerfile', '')
+    args = build_config.get('args', {})
+
+    # Read dockerfile content
+    dockerfile_content = ""
+    if dockerfile_path and Path(dockerfile_path).exists():
+        dockerfile_content = Path(dockerfile_path).read_text(encoding="utf-8")
+
+    # Resolve base image id from depends_on
+    deps = image_config.get('depends_on', [])
+    base_image_id = deps[0] if deps else None
+
+    entry = {
+        "id": image_name,
+        "name": image_name.split('-')[0],
+        "tag": image_config.get('tags', [''])[0],
+        "dockerfile": dockerfile_content,
+        "dockerfilePath": dockerfile_path,
+        "baseImageId": base_image_id,
+        "args": args,
+        "purpose": image_config.get('purpose'),
+        "chip": args.get('CHIP_TYPE'),
+        "cannVersion": args.get('CANN_VERSION'),
+        "installType": "online" if "8.5" in dockerfile_path else "offline",
+        "pushedAt": datetime.now(timezone.utc).isoformat(),
+    }
+
+    out = catalog_dir / f"{image_name}.json"
+    out.write_text(json.dumps(entry, indent=2), encoding="utf-8")
+    print(f"📋 Catalog entry written: {out}")
+
+def push_image(image_name, image_config, rc=None):
+    for tag in image_config.get('tags', []):
+        push_tag = rc_tag(tag, rc) if rc else tag
+        if rc:
+            run_command(f"docker tag {tag} {push_tag}")
+        run_command(f"docker push {push_tag}")
 
 def build_image(image_name, image_config, all_images):
     print(f"\n📦 Building {image_name}")
@@ -176,6 +252,8 @@ def main():
     parser.add_argument("--target", help="Build specific image and its dependencies")
     parser.add_argument("--list", action="store_true", help="List all available images")
     parser.add_argument("--graph", action="store_true", help="Generate Mermaid dependency graph")
+    parser.add_argument("--push", action="store_true", help="Push images to registry after building")
+    parser.add_argument("--rc", metavar="TAG", help="Push as release candidate with suffix (e.g. --rc rc1)")
     args = parser.parse_args()
     
     config = load_images_config()
@@ -199,7 +277,11 @@ def main():
     
     for image_name in build_order:
         build_image(image_name, config['images'][image_name], config['images'])
-    
+        if args.push or args.rc:
+            push_image(image_name, config['images'][image_name], rc=args.rc)
+            if not args.rc:
+                write_catalog_entry(image_name, config['images'][image_name], config['images'])
+
     print("✅ All builds completed!")
 
 if __name__ == "__main__":

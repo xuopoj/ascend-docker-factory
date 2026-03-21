@@ -15,29 +15,18 @@ version: "1.0"
 
 images:
   # ================= Base Images =================
-  python-3.10:
+  python:
+    matrix:
+      PYTHON_VERSION: ["3.10", "3.11"]
     build:
       context: .
       dockerfile: dockerfiles/python.dockerfile
       args:
-        PYTHON_VERSION: "3.10"
         BASE_IMAGE: "ubuntu:22.04"
         PIP_INDEX_URL: "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple"
         INCLUDE_DEBUG_TOOLS: "true"
     tags:
-      - "python:3.10"
-  
-  python-3.11:
-    build:
-      context: .
-      dockerfile: dockerfiles/python.dockerfile
-      args:
-        PYTHON_VERSION: "3.11"
-        BASE_IMAGE: "ubuntu:22.04"
-        PIP_INDEX_URL: "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple"
-        INCLUDE_DEBUG_TOOLS: "true"
-    tags:
-      - "python:3.11"
+      - "quay.io/service-delivery-hub/python:{PYTHON_VERSION}"
   # ================= Machine Learning Images =================
   ml-basic:
     purpose: training  # training, inference, or both
@@ -50,7 +39,7 @@ images:
       context: .
       dockerfile: dockerfiles/ml-basic.dockerfile
     tags:
-      - "ml-basic:latest"
+      - "quay.io/service-delivery-hub/ml-basic:latest"
 
   # ================= PyTorch Images =================
   pytorch-cpu:
@@ -67,9 +56,24 @@ images:
         TORCH_VERSION: "2.7.1"
         TORCH_VARIANT: "cpu"
     tags:
-      - "pytorch:2.7.1-cpu"
+      - "quay.io/service-delivery-hub/pytorch:2.7.1-cpu"
 
-  # ================= CANN Images =================
+  # ================= CANN Images (≤8.3, offline install) =================
+  # Packages must be placed in packages/<CANN_VERSION>/ before building.
+  cann-8.0rc1-910b:
+    depends_on:
+      - python-3.10
+    build:
+      context: .
+      dockerfile: dockerfiles/cann.dockerfile
+      args:
+        CANN_VERSION: "8.0.RC1"
+        CHIP_TYPE: "910b"
+        DRIVER_VERSION: "24.1.1"
+        INSTALL_COMPONENTS: "toolkit,kernels"
+    tags:
+      - "quay.io/service-delivery-hub/cann:8.0rc1-910b"
+
   cann-8.2rc1-910b:
     depends_on:
       - python-3.10
@@ -82,7 +86,7 @@ images:
         DRIVER_VERSION: "24.1.1"
         INSTALL_COMPONENTS: "toolkit,kernels,nnal"
     tags:
-      - "cann:8.2rc1-910b"
+      - "quay.io/service-delivery-hub/cann:8.2rc1-910b"
 
   cann-8.3rc1-910b:
     depends_on:
@@ -94,23 +98,38 @@ images:
         CANN_VERSION: "8.3.RC1"
         CHIP_TYPE: "910b"
         DRIVER_VERSION: "24.1.1"
-        INSTALL_COMPONENTS: "toolkit,nnae,kernels,nnal"
+        INSTALL_COMPONENTS: "toolkit,kernels,nnal"
     tags:
-      - "cann:8.3rc1-910b"
+      - "quay.io/service-delivery-hub/cann:8.3rc1-910b"
 
-  cann-8.2rc1-310p:
+  cann-8.3rc1-310p:
     depends_on:
       - python-3.10
     build:
       context: .
       dockerfile: dockerfiles/cann.dockerfile
       args:
-        CANN_VERSION: "8.2.RC1"
+        CANN_VERSION: "8.3.RC1"
         CHIP_TYPE: "310p"
         DRIVER_VERSION: "24.1.1"
         INSTALL_COMPONENTS: "toolkit,kernels"
     tags:
-      - "cann:8.2rc1-310p"
+      - "quay.io/service-delivery-hub/cann:8.3rc1-310p"
+
+  # ================= CANN Images (8.5+, online install) =================
+  # Packages are downloaded from Huawei OBS during build.
+  cann-8.5.0-910b:
+    depends_on:
+      - python-3.10
+    build:
+      context: .
+      dockerfile: dockerfiles/cann-8.5.dockerfile
+      args:
+        CANN_VERSION: "8.5.0"
+        CANN_BUILD_TAG: "8.5.T63"
+        CHIP_TYPE: "910b"
+    tags:
+      - "quay.io/service-delivery-hub/cann:8.5.0-910b"
 
   pytorch-npu-910b:
     purpose: training
@@ -127,7 +146,7 @@ images:
         TORCH_NPU_VERSION: "2.5.1"
         TORCHVISION_VERSION: "0.20.1"
     tags:
-      - "pytorch:2.5.1-npu-910b"
+      - "quay.io/service-delivery-hub/pytorch:2.5.1-npu-910b"
 
   pytorch-npu-310p:
     purpose: inference
@@ -135,7 +154,7 @@ images:
     app_name: "PyTorch Base"
     description: "General deep learning framework with NPU acceleration (310P)"
     depends_on:
-      - cann-8.2rc1-310p
+      - cann-8.3rc1-310p
     build:
       context: .
       dockerfile: dockerfiles/pytorch-npu.dockerfile
@@ -144,7 +163,7 @@ images:
         TORCH_NPU_VERSION: "2.5.1"
         TORCHVISION_VERSION: "0.20.1"
     tags:
-      - "pytorch:2.5.1-npu-310p"
+      - "quay.io/service-delivery-hub/pytorch:2.5.1-npu-310p"
 
   # ================= Inference Runtimes =================
   ascend-vllm:
@@ -160,7 +179,7 @@ images:
         BASE_IMAGE: "v0.11.0rc2"
         INCLUDE_DEBUG_TOOLS: "true"
     tags:
-      - "ascend-vllm:v0.11.0rc2"
+      - "quay.io/service-delivery-hub/ascend-vllm:v0.11.0rc2"
 
   # ================= Framework-Level Tools =================
   # Note: App-specific images (YOLO, Flask, Chronos, etc.) should be built
@@ -177,4 +196,4 @@ images:
       context: .
       dockerfile: dockerfiles/msmodelslim.dockerfile
     tags:
-      - "msmodelslim:latest-npu-910b"
+      - "quay.io/service-delivery-hub/msmodelslim:latest-npu-910b"

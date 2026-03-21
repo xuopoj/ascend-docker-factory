@@ -1,7 +1,7 @@
-ARG BASE_IMAGE=v0.11.0rc2
-ARG INCLUDE_DEBUG_TOOLS=true
-
+ARG BASE_IMAGE=v0.13.0rc1
 FROM quay.io/ascend/vllm-ascend:${BASE_IMAGE}
+
+ARG INCLUDE_DEBUG_TOOLS=true
 
 # Install debugging and network tools (optional)
 RUN if [ "$INCLUDE_DEBUG_TOOLS" = "true" ]; then \
@@ -19,7 +19,6 @@ RUN if [ "$INCLUDE_DEBUG_TOOLS" = "true" ]; then \
         iputils-ping \
         traceroute \
         nload \
-        bandwhich \
         && rm -rf /var/lib/apt/lists/*; \
     fi
 

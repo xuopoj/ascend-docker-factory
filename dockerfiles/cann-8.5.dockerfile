@@ -2,36 +2,22 @@
 ARG BASE_IMAGE=python:3.10
 FROM ${BASE_IMAGE}
 
-ARG CANN_VERSION=8.3.RC1
-ARG CHIP_TYPE="910b"
-ARG DRIVER_VERSION="24.1.1"
-ARG INSTALL_COMPONENTS=toolkit,nnal,kernels
+ARG CANN_VERSION=8.5.0
+ARG CANN_BUILD_TAG=8.5.T63
+ARG CHIP_TYPE=910b
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 USER root
 
-# 3. Install CANN via BuildKit Mount
-RUN --mount=type=bind,source=packages/${CANN_VERSION},target=/tmp/packages \
-    cd /tmp/packages && \
-    export LD_LIBRARY_PATH="" && \
-    export PYTHONPATH="" && \
-    export DRIVER_VERSION=${DRIVER_VERSION} && \
-    if echo "${INSTALL_COMPONENTS}" | grep -q "nnae"; then \
-        ./Ascend-cann-nnae_${CANN_VERSION}_linux*.run --install --quiet; \
-    elif echo "${INSTALL_COMPONENTS}" | grep -q "toolkit"; then \
-        ./Ascend-cann-toolkit_${CANN_VERSION}_linux*.run --install --quiet; \
-    fi && \
-    . /usr/local/Ascend/ascend-toolkit/set_env.sh && \
-    if echo "${INSTALL_COMPONENTS}" | grep -q "kernels"; then \
-        ./Ascend-cann-kernels-${CHIP_TYPE}_${CANN_VERSION}_linux*.run --install --quiet; \
-    fi && \
-    if echo "${INSTALL_COMPONENTS}" | grep -q "nnal"; then \
-        ./Ascend-cann-nnal_${CANN_VERSION}_linux*.run --install --quiet; \
-    fi && \
-    echo "CANN installation completed"
+RUN wget -q "https://ascend-repo.obs.cn-east-2.myhuaweicloud.com/CANN/CANN%20${CANN_BUILD_TAG}/Ascend-cann_${CANN_VERSION}_linux-aarch64.run" \
+    && bash ./Ascend-cann_${CANN_VERSION}_linux-aarch64.run --install \
+    && rm Ascend-cann_${CANN_VERSION}_linux-aarch64.run \
+    && wget -q "https://ascend-repo.obs.cn-east-2.myhuaweicloud.com/CANN/CANN%20${CANN_BUILD_TAG}/Ascend-cann-${CHIP_TYPE}-ops_${CANN_VERSION}_linux-aarch64.run" \
+    && bash ./Ascend-cann-${CHIP_TYPE}-ops_${CANN_VERSION}_linux-aarch64.run --install \
+    && rm Ascend-cann-${CHIP_TYPE}-ops_${CANN_VERSION}_linux-aarch64.run
 
-# 4a. CANN Toolkit Environment
+# CANN Toolkit Environment
 ENV ASCEND_TOOLKIT_HOME=/usr/local/Ascend/ascend-toolkit/latest \
     ASCEND_AICPU_PATH=/usr/local/Ascend/ascend-toolkit/latest \
     ASCEND_OPP_PATH=/usr/local/Ascend/ascend-toolkit/latest/opp \
@@ -41,16 +27,11 @@ ENV LD_LIBRARY_PATH=${ASCEND_TOOLKIT_HOME}/lib64:${ASCEND_TOOLKIT_HOME}/lib64/pl
 ENV PYTHONPATH=${ASCEND_TOOLKIT_HOME}/python/site-packages:${ASCEND_TOOLKIT_HOME}/opp/built-in/op_impl/ai_core/tbe
 ENV PATH=${ASCEND_TOOLKIT_HOME}/bin:${ASCEND_TOOLKIT_HOME}/compiler/ccec_compiler/bin:${ASCEND_TOOLKIT_HOME}/tools/ccec_compiler/bin:${PATH}
 
-# 4b. Ascend Driver Environment (host-mounted at runtime via device plugin)
+# Ascend Driver Environment (host-mounted at runtime via device plugin)
 ENV ASCEND_DRIVER_HOME=/usr/local/Ascend/driver
 ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${ASCEND_DRIVER_HOME}/lib64:${ASCEND_DRIVER_HOME}/lib64/driver
 ENV PATH=${PATH}:${ASCEND_DRIVER_HOME}/bin
 
-
-# 5. Persist env vars for login shells (SSH) and non-login interactive shells (docker exec bash)
-# Write our own env script instead of sourcing set_env.sh to:
-#   - guarantee consistency with the ENV declarations above
-#   - avoid duplicate PATH entries on repeated shell invocations
 RUN { \
     echo '# CANN Toolkit'; \
     echo 'export ASCEND_TOOLKIT_HOME=/usr/local/Ascend/ascend-toolkit/latest'; \
@@ -72,7 +53,5 @@ RUN { \
     cp /etc/profile.d/ascend.sh /etc/ascend-env.sh && \
     echo '. /etc/ascend-env.sh' >> /etc/bash.bashrc
 
-# 6. Hardware Metadata Labeling
 LABEL com.ascend.chip=${CHIP_TYPE} \
-      com.ascend.driver.version=${DRIVER_VERSION} \
       com.ascend.cann.version=${CANN_VERSION}
