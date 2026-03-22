@@ -13,5 +13,6 @@
   "chip": null,
   "cannVersion": null,
   "installType": "offline",
-  "pushedAt": "2026-03-21T16:06:16.760938+00:00"
+  "pushedAt": "2026-03-22T11:28:19.759906+00:00",
+  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/vllm-ascend/vllm-ascend-v0.15.0rc1.tar.gz"
 }
