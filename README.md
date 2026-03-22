@@ -33,9 +33,9 @@ roles: ["secret"]
 
 ### 构建基础镜像
 
-[service-delivery-hub](https://blog.service-delivery-hub.com/dockerfile-generator) 提供了一个常用镜像dockerfile的生成功能，可以根据自己的使用场景下载对应的dockerfile和构建命令，在本地完成构建。
+[昇腾镜像中心](https://tools.service-delivery-hub.com/ascend-image-hub) 提供了预构建的昇腾 NPU 镜像，可直接拉取或下载离线包使用。也可以基于本项目自行构建定制镜像。
 
-1. 访问[Dockerfile 生成器](https://blog.service-delivery-hub.com/dockerfile-generator)，根据实际需求生成对应的Dockerfile和构建命令；
+1. 访问[昇腾镜像中心](https://tools.service-delivery-hub.com/ascend-image-hub)，查找所需镜像，直接 `docker pull` 或下载 tar.gz 离线包；
 2. 下载CANN组件：[CANN资源下载](https://www.hiascend.com/developer/download/community/result)，注意选择匹配的版本，CPU架构选择AArch64， 软件包格式选择run，组件包参考[ascend-cann体系组成](#ascend-cann体系组成)下载所需的安装包；并把下载的包放到packages/8.x.x(根据实际的版本确定)目录下；
 3. 完成构建。
 
@@ -47,7 +47,7 @@ docker build -t swr.sdh.com/orginization/pytorch:2.7.1-cann83rc1-910b-python3.10
 
 除了使用[构建基础镜像](#构建基础镜像)提供的dockerfile模型，还可以使用`ascend-docker-factory`提供的镜像构建能力，基于这个库可以支持更自定义的使用方式。
 
-[Dockerfile 生成器](https://blog.service-delivery-hub.com/dockerfile-generator)中的模版即从此项目生成。
+[昇腾镜像中心](https://tools.service-delivery-hub.com/ascend-image-hub)中的预构建镜像即从此项目构建，并发布至 `quay.io/service-delivery-hub/`。
 
 ### 下载
 
@@ -88,7 +88,7 @@ images:
 
 ```bash
 # python build.py -h
-usage: build.py [-h] [--target TARGET] [--list] [--graph]
+usage: build.py [-h] [--target TARGET] [--list] [--graph] [--push] [--save] [--delete] [--no-build]
 
 Build Docker images using dockerfile-compose
 
@@ -97,6 +97,10 @@ options:
   --target TARGET  Build specific image and its dependencies
   --list           List all available images
   --graph          Generate Mermaid dependency graph
+  --push           Push image to registry after building
+  --save           Save image as tar.gz and upload to ModelScope
+  --delete         Delete local image after pushing (saves disk space)
+  --no-build       Skip build step (use existing local image)
 ```
 
 #### 列举所有可构建的镜像
@@ -266,35 +270,34 @@ docker push swr.cloud.com/pytorch:2.5.1-npu-910b
 
 #### 构建vLLM推理框架
 
-配置文件，vLLM作为推理框架，使用外部基础镜像。
+基于 [vllm-project/vllm-ascend](https://github.com/vllm-project/vllm-ascend) 官方镜像，添加网络调试工具和 `ma-user` 用户（与 ModelArts 平台兼容）。
+
+预构建镜像已发布，可直接使用：
+
+```bash
+docker pull quay.io/service-delivery-hub/vllm-ascend:v0.17.0rc1
+```
+
+或访问[昇腾镜像中心](https://tools.service-delivery-hub.com/ascend-image-hub?type=vllm)查看所有可用版本，支持从 ModelScope 下载离线 tar.gz。
+
+如需自行构建：
 
 ```yaml
-  ascend-vllm:
+  vllm-ascend-v0.17.0rc1:
     purpose: inference
-    app_type: vllm
-    app_name: "vLLM Runtime"
-    description: "High-performance LLM inference framework"
-    standalone: true
     build:
       context: .
       dockerfile: dockerfiles/vllm.dockerfile
       args:
-        BASE_IMAGE: "v0.11.0rc2"
+        BASE_IMAGE: "v0.17.0rc1"
         INCLUDE_DEBUG_TOOLS: "true"
     tags:
-      - "ascend-vllm:v0.11.0rc2"
+      - "quay.io/service-delivery-hub/vllm-ascend:v0.17.0rc1"
 ```
 
-命令
 ```bash
-# 构建镜像
-python build.py --target ascend-vllm
-# 保存镜像
-docker save -o ascend-vllm-v0.11.0rc2.tar ascend-vllm:v0.11.0rc2
-# tag
-docker tag ascend-vllm:v0.11.0rc2 swr.cloud.com/org1/ascend-vllm:v0.11.0rc2
-# push
-docker push swr.cloud.com/org1/ascend-vllm:v0.11.0rc2
+# 构建并推送
+python build.py --target vllm-ascend-v0.17.0rc1 --push --save --delete
 ```
 
 ### 其他参考
