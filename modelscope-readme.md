@@ -1,3 +1,13 @@
+---
+license: Apache License 2.0
+task: other
+tags:
+- docker
+- ascend
+- npu
+- vllm
+---
+
 # 昇腾 NPU 预构建镜像 / Ascend NPU Pre-built Images
 
 预构建的昇腾 NPU Docker 镜像，适用于训练、推理等场景，免去从头配置环境的麻烦。
@@ -18,7 +28,6 @@
 | v0.13.0 | `quay.io/service-delivery-hub/vllm-ascend:v0.13.0` | [vllm-ascend-v0.13.0.tar.gz](vllm-ascend/vllm-ascend-v0.13.0.tar.gz) |
 | v0.14.0rc1 | `quay.io/service-delivery-hub/vllm-ascend:v0.14.0rc1` | [vllm-ascend-v0.14.0rc1.tar.gz](vllm-ascend/vllm-ascend-v0.14.0rc1.tar.gz) |
 | v0.15.0rc1 | `quay.io/service-delivery-hub/vllm-ascend:v0.15.0rc1` | [vllm-ascend-v0.15.0rc1.tar.gz](vllm-ascend/vllm-ascend-v0.15.0rc1.tar.gz) |
-| v0.16.0rc1 | `quay.io/service-delivery-hub/vllm-ascend:v0.16.0rc1` | [vllm-ascend-v0.16.0rc1.tar.gz](vllm-ascend/vllm-ascend-v0.16.0rc1.tar.gz) |
 | v0.17.0rc1 | `quay.io/service-delivery-hub/vllm-ascend:v0.17.0rc1` | [vllm-ascend-v0.17.0rc1.tar.gz](vllm-ascend/vllm-ascend-v0.17.0rc1.tar.gz) |
 
 ---
