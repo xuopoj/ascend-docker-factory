@@ -10,6 +10,17 @@ from datetime import datetime, timezone
 from pathlib import Path
 import re
 
+def load_env():
+    env_file = Path(__file__).parent / ".env"
+    if env_file.exists():
+        for line in env_file.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                key, _, value = line.partition("=")
+                os.environ.setdefault(key.strip(), value.strip())
+
+load_env()
+
 def run_command(cmd):
     print(f"🔨 [EXEC] {cmd}")
     env = os.environ.copy()
@@ -114,7 +125,7 @@ def rc_tag(tag, rc):
         return f"{repo}:{version}-{rc}"
     return f"{tag}-{rc}"
 
-def write_catalog_entry(image_name, image_config, all_images):
+def write_catalog_entry(image_name, image_config, all_images, modelscope_url=None):
     catalog_dir = Path("catalog")
     catalog_dir.mkdir(exist_ok=True)
 
@@ -122,10 +133,17 @@ def write_catalog_entry(image_name, image_config, all_images):
     dockerfile_path = build_config.get('dockerfile', '')
     args = build_config.get('args', {})
 
-    # Read dockerfile content
+    # Read dockerfile content and substitute ARG defaults with actual build args
     dockerfile_content = ""
     if dockerfile_path and Path(dockerfile_path).exists():
         dockerfile_content = Path(dockerfile_path).read_text(encoding="utf-8")
+        for key, value in args.items():
+            dockerfile_content = re.sub(
+                rf'^(ARG {key}=).*$',
+                rf'\g<1>{value}',
+                dockerfile_content,
+                flags=re.MULTILINE,
+            )
 
     # Resolve base image id from depends_on
     deps = image_config.get('depends_on', [])
@@ -144,6 +162,7 @@ def write_catalog_entry(image_name, image_config, all_images):
         "cannVersion": args.get('CANN_VERSION'),
         "installType": "online" if "8.5" in dockerfile_path else "offline",
         "pushedAt": datetime.now(timezone.utc).isoformat(),
+        "modelscopeUrl": modelscope_url,
     }
 
     out = catalog_dir / f"{image_name}.json"
@@ -156,6 +175,163 @@ def push_image(image_name, image_config, rc=None):
         if rc:
             run_command(f"docker tag {tag} {push_tag}")
         run_command(f"docker push {push_tag}")
+
+def delete_image(image_config):
+    for tag in image_config.get('tags', []):
+        run_command(f"docker rmi {tag}")
+
+def save_image(image_name, image_config):
+    """Save image as compressed tarball, return path."""
+    tag = image_config.get('tags', [])[0]
+    tarball = Path(f"{image_name}.tar.gz")
+    print(f"💾 Saving {tag} → {tarball}")
+    # Pull fresh to avoid corrupt local cache (e.g. after disk issues)
+    run_command(f"docker pull {tag}")
+    ret = subprocess.call(f"docker save {tag} | gzip > {tarball}", shell=True)
+    if ret != 0:
+        print("❌ Save failed!")
+        sys.exit(1)
+    size_mb = tarball.stat().st_size / 1024 / 1024
+    print(f"   Size: {size_mb:.1f} MB")
+    return tarball
+
+def modelscope_upload(image_name, image_config, tarball_path):
+    """Upload tarball to ModelScope and update images.jsonl. Returns download URL."""
+    token = os.environ.get("MODELSCOPE_TOKEN")
+    if not token:
+        print("❌ MODELSCOPE_TOKEN not set")
+        sys.exit(1)
+
+    from modelscope.hub.api import HubApi
+    api = HubApi()
+    api.login(token)
+
+    repo_id = "xuopoj/service-delivery-hub"
+    # e.g. vllm-ascend/vllm-ascend-v0.16.0rc1.tar.gz
+    folder = image_name.rsplit("-", 1)[0] if image_name[-1].isdigit() else image_name
+    # use image_name prefix up to version part as folder
+    # e.g. "vllm-ascend-v0.16.0rc1" -> folder "vllm-ascend"
+    parts = image_name.split("-")
+    folder = "-".join(p for p in parts if not p.startswith("v") or not p[1:2].isdigit())
+    path_in_repo = f"{folder}/{tarball_path.name}"
+
+    print(f"⬆️  Uploading to ModelScope {repo_id}/{path_in_repo}")
+    api.upload_file(
+        path_or_fileobj=str(tarball_path),
+        path_in_repo=path_in_repo,
+        repo_id=repo_id,
+        repo_type="dataset",
+        commit_message=f"Add {image_name}",
+    )
+
+    # Build direct download URL
+    download_url = f"https://modelscope.cn/datasets/{repo_id}/resolve/master/{path_in_repo}"
+    print(f"   URL: {download_url}")
+
+    # Update images.jsonl
+    _update_images_jsonl(api, repo_id, image_name, image_config, path_in_repo, download_url)
+
+    return download_url
+
+def _update_images_jsonl(api, repo_id, image_name, image_config, path_in_repo, download_url):
+    """Fetch images.jsonl, upsert current image entry, re-upload."""
+    import urllib.request
+    jsonl_path = "images.jsonl"
+    lines = {}
+
+    # Try to fetch existing file
+    try:
+        url = api.get_dataset_file_url(
+            file_name=jsonl_path,
+            dataset_name="service-delivery-hub",
+            namespace="xuopoj",
+        )
+        with urllib.request.urlopen(url) as resp:
+            content = resp.read().decode("utf-8")
+        for line in content.splitlines():
+            line = line.strip()
+            if line:
+                entry = json.loads(line)
+                lines[entry["id"]] = entry
+    except Exception:
+        pass  # File doesn't exist yet, start fresh
+
+    # Build catalog entry for this image
+    build_args = image_config.get("build", {}).get("args", {})
+    lines[image_name] = {
+        "id": image_name,
+        "tag": image_config.get("tags", [""])[0],
+        "purpose": image_config.get("purpose"),
+        "tarball": path_in_repo,
+        "modelscopeUrl": download_url,
+        "pushedAt": datetime.now(timezone.utc).isoformat(),
+        "args": build_args,
+    }
+
+    new_content = "\n".join(json.dumps(e) for e in lines.values()) + "\n"
+    api.upload_file(
+        path_or_fileobj=new_content.encode("utf-8"),
+        path_in_repo=jsonl_path,
+        repo_id=repo_id,
+        repo_type="dataset",
+        commit_message=f"Update images.jsonl for {image_name}",
+    )
+    print(f"📋 images.jsonl updated on ModelScope")
+
+    _update_modelscope_readme(api, repo_id, lines)
+
+def _update_modelscope_readme(api, repo_id, all_entries):
+    """Regenerate README.md on ModelScope with current image table."""
+    readme_template = (Path(__file__).parent / "modelscope-readme.md").read_text(encoding="utf-8")
+
+    # Group entries by image family (e.g. "vllm-ascend")
+    families = {}
+    for entry in all_entries.values():
+        parts = entry["id"].split("-")
+        # family = everything before the version segment (starts with 'v' + digit)
+        family_parts = []
+        for p in parts:
+            if p.startswith("v") and p[1:2].isdigit():
+                break
+            family_parts.append(p)
+        family = "-".join(family_parts) if family_parts else entry["id"]
+        families.setdefault(family, []).append(entry)
+
+    # Build image table sections
+    table_sections = []
+    for family, entries in sorted(families.items()):
+        rows = []
+        for e in sorted(entries, key=lambda x: x["id"]):
+            version = e["id"][len(family)+1:]  # strip "vllm-ascend-"
+            tag = e["tag"]
+            url = e.get("modelscopeUrl", "")
+            tarball_name = url.split("/")[-1] if url else f"{e['id']}.tar.gz"
+            rows.append(f"| {version} | `{tag}` | [{tarball_name}]({url}) |")
+        table = "\n".join([
+            f"### {family}",
+            "",
+            "| 版本 | quay.io 标签 | 下载 |",
+            "|------|-------------|------|",
+        ] + rows)
+        table_sections.append(table)
+
+    # Replace the table block in readme (between ## 可用镜像 and the next ---)
+    new_section = "## 可用镜像 / Available Images\n\n" + "\n\n".join(table_sections) + "\n\n---"
+    updated = re.sub(
+        r"## 可用镜像 / Available Images.*?---",
+        new_section,
+        readme_template,
+        flags=re.DOTALL,
+    )
+
+    api.upload_file(
+        path_or_fileobj=updated.encode("utf-8"),
+        path_in_repo="README.md",
+        repo_id=repo_id,
+        repo_type="dataset",
+        commit_message="Update README image table",
+    )
+    print(f"📄 README.md updated on ModelScope")
 
 def build_image(image_name, image_config, all_images):
     print(f"\n📦 Building {image_name}")
@@ -253,7 +429,10 @@ def main():
     parser.add_argument("--list", action="store_true", help="List all available images")
     parser.add_argument("--graph", action="store_true", help="Generate Mermaid dependency graph")
     parser.add_argument("--push", action="store_true", help="Push images to registry after building")
+    parser.add_argument("--delete", action="store_true", help="Delete local image after pushing (saves disk space)")
+    parser.add_argument("--save", action="store_true", help="Save image as tar.gz and upload to ModelScope")
     parser.add_argument("--rc", metavar="TAG", help="Push as release candidate with suffix (e.g. --rc rc1)")
+    parser.add_argument("--no-build", action="store_true", help="Skip build step (use existing local image)")
     args = parser.parse_args()
     
     config = load_images_config()
@@ -276,11 +455,20 @@ def main():
     print(f"🚀 Build order: {' -> '.join(build_order)}")
     
     for image_name in build_order:
-        build_image(image_name, config['images'][image_name], config['images'])
+        if not args.no_build:
+            build_image(image_name, config['images'][image_name], config['images'])
         if args.push or args.rc:
             push_image(image_name, config['images'][image_name], rc=args.rc)
-            if not args.rc:
-                write_catalog_entry(image_name, config['images'][image_name], config['images'])
+        if not args.rc and (args.push or args.save or args.no_build):
+            modelscope_url = None
+            if args.save:
+                tarball = save_image(image_name, config['images'][image_name])
+                modelscope_url = modelscope_upload(image_name, config['images'][image_name], tarball)
+                tarball.unlink()
+                print(f"🗑️  Deleted local tarball {tarball}")
+            write_catalog_entry(image_name, config['images'][image_name], config['images'], modelscope_url)
+        if args.delete:
+            delete_image(config['images'][image_name])
 
     print("✅ All builds completed!")
 

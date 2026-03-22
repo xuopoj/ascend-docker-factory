@@ -166,20 +166,21 @@ images:
       - "quay.io/service-delivery-hub/pytorch:2.5.1-npu-310p"
 
   # ================= Inference Runtimes =================
-  ascend-vllm:
+  vllm-ascend:
     purpose: inference
     app_type: vllm
     app_name: "vLLM Runtime"
     description: "High-performance LLM inference framework"
     standalone: true
+    matrix:
+      BASE_IMAGE: ["v0.13.0", "v0.14.0rc1", "v0.15.0rc1", "v0.16.0rc1", "v0.17.0rc1"]
     build:
       context: .
       dockerfile: dockerfiles/vllm.dockerfile
       args:
-        BASE_IMAGE: "v0.11.0rc2"
         INCLUDE_DEBUG_TOOLS: "true"
     tags:
-      - "quay.io/service-delivery-hub/ascend-vllm:v0.11.0rc2"
+      - "quay.io/service-delivery-hub/vllm-ascend:{BASE_IMAGE}"
 
   # ================= Framework-Level Tools =================
   # Note: App-specific images (YOLO, Flask, Chronos, etc.) should be built
