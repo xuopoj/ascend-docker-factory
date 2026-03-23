@@ -19,6 +19,24 @@ tags:
 
 ## 可用镜像 / Available Images
 
+### Python 基础镜像
+
+包含 Python 环境、常用工具、oh-my-zsh 及 Jupyter，适配 ModelArts `ma-user`（uid=1000）。
+
+| 版本 | quay.io 标签 | 下载 |
+|------|-------------|------|
+| 3.10 | `quay.io/service-delivery-hub/python:3.10` | [python-3.10.tar.gz](python/python-3.10.tar.gz) |
+| 3.11 | `quay.io/service-delivery-hub/python:3.11` | [python-3.11.tar.gz](python/python-3.11.tar.gz) |
+
+### CANN 镜像
+
+基于 Python 基础镜像，安装 CANN Toolkit + Kernels + NNAL，支持 910B / 310P 芯片。
+
+| 版本 | quay.io 标签 | 下载 |
+|------|-------------|------|
+| 8.3rc1-910b | `quay.io/service-delivery-hub/cann:8.3rc1-910b` | [cann-8.3rc1-910b.tar.gz](cann/cann-8.3rc1-910b.tar.gz) |
+| 8.3rc1-310p | `quay.io/service-delivery-hub/cann:8.3rc1-310p` | [cann-8.3rc1-310p.tar.gz](cann/cann-8.3rc1-310p.tar.gz) |
+
 ### vLLM Ascend
 
 基于 [vllm-project/vllm-ascend](https://github.com/vllm-project/vllm-ascend) 的高性能 LLM 推理镜像，已预装网络调试工具。

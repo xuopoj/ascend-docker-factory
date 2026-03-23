@@ -180,13 +180,13 @@ def delete_image(image_config):
     for tag in image_config.get('tags', []):
         run_command(f"docker rmi {tag}")
 
-def save_image(image_name, image_config):
+def save_image(image_name, image_config, no_pull=False):
     """Save image as compressed tarball, return path."""
     tag = image_config.get('tags', [])[0]
     tarball = Path(f"{image_name}.tar.gz")
     print(f"💾 Saving {tag} → {tarball}")
-    # Pull fresh to avoid corrupt local cache (e.g. after disk issues)
-    run_command(f"docker pull {tag}")
+    if not no_pull:
+        run_command(f"docker pull {tag}")
     ret = subprocess.call(f"docker save {tag} | gzip > {tarball}", shell=True)
     if ret != 0:
         print("❌ Save failed!")
@@ -207,12 +207,17 @@ def modelscope_upload(image_name, image_config, tarball_path):
     api.login(token)
 
     repo_id = "xuopoj/service-delivery-hub"
-    # e.g. vllm-ascend/vllm-ascend-v0.16.0rc1.tar.gz
-    folder = image_name.rsplit("-", 1)[0] if image_name[-1].isdigit() else image_name
-    # use image_name prefix up to version part as folder
-    # e.g. "vllm-ascend-v0.16.0rc1" -> folder "vllm-ascend"
+    # Use image family name as folder: "python-3.10" -> "python", "vllm-ascend-v0.13.0" -> "vllm-ascend"
+    folder = image_name.split('-')[0]
+    # For multi-word families like "vllm-ascend", keep prefix up to version segment
     parts = image_name.split("-")
-    folder = "-".join(p for p in parts if not p.startswith("v") or not p[1:2].isdigit())
+    family_parts = []
+    for p in parts:
+        # stop at version segment: starts with digit or 'v' followed by digit
+        if p[0].isdigit() or (p.startswith("v") and len(p) > 1 and p[1].isdigit()):
+            break
+        family_parts.append(p)
+    folder = "-".join(family_parts) if family_parts else image_name.split('-')[0]
     path_in_repo = f"{folder}/{tarball_path.name}"
 
     print(f"⬆️  Uploading to ModelScope {repo_id}/{path_in_repo}")
@@ -277,61 +282,6 @@ def _update_images_jsonl(api, repo_id, image_name, image_config, path_in_repo, d
         commit_message=f"Update images.jsonl for {image_name}",
     )
     print(f"📋 images.jsonl updated on ModelScope")
-
-    _update_modelscope_readme(api, repo_id, lines)
-
-def _update_modelscope_readme(api, repo_id, all_entries):
-    """Regenerate README.md on ModelScope with current image table."""
-    readme_template = (Path(__file__).parent / "modelscope-readme.md").read_text(encoding="utf-8")
-
-    # Group entries by image family (e.g. "vllm-ascend")
-    families = {}
-    for entry in all_entries.values():
-        parts = entry["id"].split("-")
-        # family = everything before the version segment (starts with 'v' + digit)
-        family_parts = []
-        for p in parts:
-            if p.startswith("v") and p[1:2].isdigit():
-                break
-            family_parts.append(p)
-        family = "-".join(family_parts) if family_parts else entry["id"]
-        families.setdefault(family, []).append(entry)
-
-    # Build image table sections
-    table_sections = []
-    for family, entries in sorted(families.items()):
-        rows = []
-        for e in sorted(entries, key=lambda x: x["id"]):
-            version = e["id"][len(family)+1:]  # strip "vllm-ascend-"
-            tag = e["tag"]
-            url = e.get("modelscopeUrl", "")
-            tarball_name = url.split("/")[-1] if url else f"{e['id']}.tar.gz"
-            rows.append(f"| {version} | `{tag}` | [{tarball_name}]({url}) |")
-        table = "\n".join([
-            f"### {family}",
-            "",
-            "| 版本 | quay.io 标签 | 下载 |",
-            "|------|-------------|------|",
-        ] + rows)
-        table_sections.append(table)
-
-    # Replace the table block in readme (between ## 可用镜像 and the next ---)
-    new_section = "## 可用镜像 / Available Images\n\n" + "\n\n".join(table_sections) + "\n\n---"
-    updated = re.sub(
-        r"## 可用镜像 / Available Images.*?---",
-        new_section,
-        readme_template,
-        flags=re.DOTALL,
-    )
-
-    api.upload_file(
-        path_or_fileobj=updated.encode("utf-8"),
-        path_in_repo="README.md",
-        repo_id=repo_id,
-        repo_type="dataset",
-        commit_message="Update README image table",
-    )
-    print(f"📄 README.md updated on ModelScope")
 
 def build_image(image_name, image_config, all_images):
     print(f"\n📦 Building {image_name}")
@@ -433,6 +383,7 @@ def main():
     parser.add_argument("--save", action="store_true", help="Save image as tar.gz and upload to ModelScope")
     parser.add_argument("--rc", metavar="TAG", help="Push as release candidate with suffix (e.g. --rc rc1)")
     parser.add_argument("--no-build", action="store_true", help="Skip build step (use existing local image)")
+    parser.add_argument("--no-pull", action="store_true", help="Skip docker pull before saving (use existing local image)")
     args = parser.parse_args()
     
     config = load_images_config()
@@ -462,7 +413,7 @@ def main():
         if not args.rc and (args.push or args.save or args.no_build):
             modelscope_url = None
             if args.save:
-                tarball = save_image(image_name, config['images'][image_name])
+                tarball = save_image(image_name, config['images'][image_name], no_pull=args.no_pull)
                 modelscope_url = modelscope_upload(image_name, config['images'][image_name], tarball)
                 tarball.unlink()
                 print(f"🗑️  Deleted local tarball {tarball}")
