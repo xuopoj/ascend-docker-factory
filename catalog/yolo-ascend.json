@@ -1,0 +1,16 @@
+{
+  "id": "yolo-ascend",
+  "name": "yolo-ascend",
+  "tag": "quay.io/service-delivery-hub/yolo-ascend:latest-torch251-cann83rc1-910b",
+  "dockerfile": "ARG BASE_IMAGE=quay.io/service-delivery-hub/pytorch:2.5.1-cann83rc1-910b\nFROM ${BASE_IMAGE}\n\n# Install ultralytics from ascend fork\nRUN pip install --no-cache-dir git+https://github.com/xuopoj/ultralytics.git@ascend\n\nWORKDIR /workspace\nCMD [\"python\"]\n",
+  "dockerfilePath": "projects/yolo/yolo.dockerfile",
+  "baseImageId": "pytorch-npu-910b",
+  "args": {},
+  "purpose": "training",
+  "chip": "910b",
+  "cannVersion": null,
+  "installType": "offline",
+  "pushedAt": null,
+  "modelscopeUrl": null,
+  "projectUrl": "https://github.com/xuopoj/ultralytics/tree/ascend"
+}

@@ -146,7 +146,7 @@ images:
         TORCH_NPU_VERSION: "2.5.1"
         TORCHVISION_VERSION: "0.20.1"
     tags:
-      - "quay.io/service-delivery-hub/pytorch:2.5.1-npu-910b"
+      - "quay.io/service-delivery-hub/pytorch:2.5.1-cann83rc1-910b"
 
   pytorch-npu-310p:
     purpose: inference
@@ -163,7 +163,7 @@ images:
         TORCH_NPU_VERSION: "2.5.1"
         TORCHVISION_VERSION: "0.20.1"
     tags:
-      - "quay.io/service-delivery-hub/pytorch:2.5.1-npu-310p"
+      - "quay.io/service-delivery-hub/pytorch:2.5.1-cann83rc1-310p"
 
   # ================= Inference Runtimes =================
   vllm-ascend:
@@ -181,6 +181,20 @@ images:
         INCLUDE_DEBUG_TOOLS: "true"
     tags:
       - "quay.io/service-delivery-hub/vllm-ascend:{BASE_IMAGE}"
+
+  # ================= Projects =================
+  yolo-ascend:
+    purpose: training
+    app_type: yolo
+    app_name: "YOLO Ascend"
+    description: "Ultralytics YOLO with Ascend NPU support"
+    depends_on:
+      - pytorch-npu-910b
+    build:
+      context: .
+      dockerfile: projects/yolo/yolo.dockerfile
+    tags:
+      - "quay.io/service-delivery-hub/yolo-ascend:latest-torch251-cann83rc1-910b"
 
   # ================= Framework-Level Tools =================
   # Note: App-specific images (YOLO, Flask, Chronos, etc.) should be built
