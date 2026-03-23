@@ -37,6 +37,22 @@ tags:
 | 8.3rc1-910b | `quay.io/service-delivery-hub/cann:8.3rc1-910b` | [cann-8.3rc1-910b.tar.gz](cann/cann-8.3rc1-910b.tar.gz) |
 | 8.3rc1-310p | `quay.io/service-delivery-hub/cann:8.3rc1-310p` | [cann-8.3rc1-310p.tar.gz](cann/cann-8.3rc1-310p.tar.gz) |
 
+### PyTorch NPU 镜像
+
+基于 CANN 镜像，安装 PyTorch + torch_npu + torchvision。
+
+| 版本 | quay.io 标签 | 下载 |
+|------|-------------|------|
+| 2.5.1-cann83rc1-910b | `quay.io/service-delivery-hub/pytorch:2.5.1-cann83rc1-910b` | [pytorch-npu-910b.tar.gz](pytorch-npu/pytorch-npu-910b.tar.gz) |
+
+### YOLO Ascend
+
+基于 [xuopoj/ultralytics](https://github.com/xuopoj/ultralytics/tree/ascend) ascend 分支的目标检测镜像，支持昇腾 NPU 训练推理。
+
+| 版本 | quay.io 标签 | 下载 |
+|------|-------------|------|
+| latest-torch251-cann83rc1-910b | `quay.io/service-delivery-hub/yolo-ascend:latest-torch251-cann83rc1-910b` | [yolo-ascend.tar.gz](yolo-ascend/yolo-ascend.tar.gz) |
+
 ### vLLM Ascend
 
 基于 [vllm-project/vllm-ascend](https://github.com/vllm-project/vllm-ascend) 的高性能 LLM 推理镜像，已预装网络调试工具。
