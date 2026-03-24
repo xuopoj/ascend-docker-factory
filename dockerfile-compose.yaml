@@ -119,6 +119,10 @@ images:
   # ================= CANN Images (8.5+, online install) =================
   # Packages are downloaded from Huawei OBS during build.
   cann-8.5.0-910b:
+    purpose: both
+    app_type: cann
+    app_name: "CANN"
+    description: "CANN 8.5.0 with online installer, supports 910B chip"
     depends_on:
       - python-3.10
     build:
@@ -130,6 +134,40 @@ images:
         CHIP_TYPE: "910b"
     tags:
       - "quay.io/service-delivery-hub/cann:8.5.0-910b"
+
+  pytorch-npu-910b-cann850:
+    purpose: training
+    app_type: pytorch
+    app_name: "PyTorch Base"
+    description: "General deep learning framework with NPU acceleration (910B, CANN 8.5)"
+    depends_on:
+      - cann-8.5.0-910b
+    build:
+      context: .
+      dockerfile: dockerfiles/pytorch-npu.dockerfile
+      args:
+        TORCH_VERSION: "2.5.1"
+        TORCH_NPU_VERSION: "2.5.1"
+        TORCHVISION_VERSION: "0.20.1"
+    tags:
+      - "quay.io/service-delivery-hub/pytorch:2.5.1-cann850-910b"
+
+  pytorch-npu-910b-cann850-torch290:
+    purpose: training
+    app_type: pytorch
+    app_name: "PyTorch Base"
+    description: "PyTorch 2.9.0 with NPU acceleration (910B, CANN 8.5)"
+    depends_on:
+      - cann-8.5.0-910b
+    build:
+      context: .
+      dockerfile: dockerfiles/pytorch-npu.dockerfile
+      args:
+        TORCH_VERSION: "2.9.0"
+        TORCH_NPU_VERSION: "2.9.0"
+        TORCHVISION_VERSION: "0.24.0"
+    tags:
+      - "quay.io/service-delivery-hub/pytorch:2.9.0-cann850-910b"
 
   pytorch-npu-910b:
     purpose: training

@@ -14,7 +14,9 @@ RUN pip install --no-cache-dir attrs cython numpy==1.26.4 decorator sympy cffi p
     
 RUN pip install --no-cache-dir datasets tiktoken wandb tqdm libcst
 
-# install pytorch
-RUN pip install --no-cache-dir torch==${TORCH_VERSION} torch_npu==${TORCH_NPU_VERSION} torchvision==${TORCHVISION_VERSION}
+# install pytorch: install torch first to get the correct aarch64 wheel,
+# then torch_npu with --no-deps to avoid it pulling torch+cpu as a dependency
+RUN pip install --no-cache-dir torch==${TORCH_VERSION} torchvision==${TORCHVISION_VERSION} && \
+    pip install --no-cache-dir --no-deps torch_npu==${TORCH_NPU_VERSION}
 
 CMD ["python"]

@@ -11,10 +11,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 USER root
 
 RUN wget -q "https://ascend-repo.obs.cn-east-2.myhuaweicloud.com/CANN/CANN%20${CANN_BUILD_TAG}/Ascend-cann_${CANN_VERSION}_linux-aarch64.run" \
-    && bash ./Ascend-cann_${CANN_VERSION}_linux-aarch64.run --install \
+    && bash ./Ascend-cann_${CANN_VERSION}_linux-aarch64.run --install --quiet \
     && rm Ascend-cann_${CANN_VERSION}_linux-aarch64.run \
     && wget -q "https://ascend-repo.obs.cn-east-2.myhuaweicloud.com/CANN/CANN%20${CANN_BUILD_TAG}/Ascend-cann-${CHIP_TYPE}-ops_${CANN_VERSION}_linux-aarch64.run" \
-    && bash ./Ascend-cann-${CHIP_TYPE}-ops_${CANN_VERSION}_linux-aarch64.run --install \
+    && bash ./Ascend-cann-${CHIP_TYPE}-ops_${CANN_VERSION}_linux-aarch64.run --install --quiet \
     && rm Ascend-cann-${CHIP_TYPE}-ops_${CANN_VERSION}_linux-aarch64.run
 
 # CANN Toolkit Environment
