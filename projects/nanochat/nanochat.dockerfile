@@ -7,7 +7,9 @@ USER ma-user
 RUN git clone -b ascend https://github.com/xuopoj/nanochat.git /home/ma-user/xuopoj/nanochat && \
     pip install --no-cache-dir -e /home/ma-user/xuopoj/nanochat && \
     pip install --no-cache-dir --force-reinstall torch==2.9.0 torchvision==0.24.0 && \
-    pip install --no-cache-dir --no-deps torch_npu==2.9.0
+    pip install --no-cache-dir --no-deps torch_npu==2.9.0 && \
+    # Pre-cache tiktoken encodings so tok_eval works offline
+    python -c "import tiktoken; tiktoken.get_encoding('gpt2'); tiktoken.get_encoding('cl100k_base')"
 
 WORKDIR /home/ma-user
 CMD ["python"]
