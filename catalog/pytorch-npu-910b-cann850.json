@@ -1,10 +1,10 @@
 {
-  "id": "pytorch-npu-910b",
+  "id": "pytorch-npu-910b-cann850",
   "name": "pytorch",
-  "tag": "quay.io/service-delivery-hub/pytorch:2.5.1-cann83rc1-910b",
+  "tag": "quay.io/service-delivery-hub/pytorch:2.5.1-cann850-910b",
   "dockerfile": "ARG BASE_IMAGE=cann:83rc1-python310\nFROM ${BASE_IMAGE}\n\nARG TORCH_VERSION=2.5.1\nARG TORCH_NPU_VERSION=2.5.1\nARG TORCHVISION_VERSION=0.20.1\n\nUSER ma-user\n\n# Install Python packages (uses global pip config from base image)\nRUN pip install --no-cache-dir attrs cython numpy==1.26.4 decorator sympy cffi pyyaml \\\n    pathlib2 psutil protobuf==3.20 scipy requests absl-py pyyaml wheel typing_extensions \\\n    tensorboard matplotlib ipykernel \"transformers>=4.41,<5\"\n    \nRUN pip install --no-cache-dir datasets tiktoken wandb tqdm libcst\n\n# install pytorch: install torch first to get the correct aarch64 wheel,\n# then torch_npu with --no-deps to avoid it pulling torch+cpu as a dependency\nRUN pip install --no-cache-dir torch==${TORCH_VERSION} torchvision==${TORCHVISION_VERSION} && \\\n    pip install --no-cache-dir --no-deps torch_npu==${TORCH_NPU_VERSION}\n\nCMD [\"python\"]\n",
   "dockerfilePath": "dockerfiles/pytorch-npu.dockerfile",
-  "baseImageId": "cann-8.3rc1-910b",
+  "baseImageId": "cann-8.5.0-910b",
   "args": {
     "TORCH_VERSION": "2.5.1",
     "TORCH_NPU_VERSION": "2.5.1",
@@ -13,13 +13,13 @@
   "purpose": "training",
   "chip": null,
   "cannVersion": null,
-  "experimental": false,
-  "pushedAt": "2026-03-28T15:36:03.128141+00:00",
-  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/pytorch-npu/pytorch-npu-910b.tar.gz",
-  "sha256": "6c35f4f57ed901ed97c0e3b29d3ae418bbdcad77e11f7f81f72de9173cf68043",
-  "quayDigest": null,
+  "experimental": true,
+  "pushedAt": "2026-03-28T16:03:17.624572+00:00",
+  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/pytorch-npu/pytorch-npu-910b-cann850.tar.gz",
+  "sha256": "cffbcb627b05760fdef2a6809d445e465939a57c09b8c44529ac3666cea82b82",
+  "quayDigest": "sha256:c0200647e3b6d4bae31ef99a419d14e1340a008ffcd211ef8782fa8eb320b85a",
   "tier": "base",
   "appType": "pytorch",
   "appName": "PyTorch",
-  "description": "General deep learning framework with NPU acceleration (910B)"
+  "description": "General deep learning framework with NPU acceleration (910B, CANN 8.5)"
 }

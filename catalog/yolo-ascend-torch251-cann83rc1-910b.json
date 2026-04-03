@@ -1,0 +1,26 @@
+{
+  "id": "yolo-ascend-torch251-cann83rc1-910b",
+  "name": "yolo",
+  "tag": "quay.io/service-delivery-hub/yolo-ascend:latest-torch251-cann83rc1-910b",
+  "dockerfile": "ARG BASE_IMAGE=quay.io/service-delivery-hub/pytorch:2.5.1-cann83rc1-910b\nFROM ${BASE_IMAGE}\n\nARG TORCH_VERSION=2.5.1\nARG TORCH_NPU_VERSION=2.5.1\nARG TORCHVISION_VERSION=0.20.1\n\nUSER ma-user\n\n# Clone ascend fork and install in editable mode for on-the-fly editing\nRUN git clone -b ascend https://github.com/xuopoj/ultralytics.git /home/ma-user/xuopoj/ultralytics && \\\n    pip install --no-cache-dir -e /home/ma-user/xuopoj/ultralytics && \\\n    pip install --no-cache-dir --force-reinstall opencv-python-headless && \\\n    pip install --no-cache-dir --force-reinstall torch==${TORCH_VERSION} torchvision==${TORCHVISION_VERSION} && \\\n    pip install --no-cache-dir --no-deps torch_npu==${TORCH_NPU_VERSION} && \\\n    pip install --no-cache-dir onnx onnxruntime onnxsim onnxslim tensorboard\n\nRUN TORCH_DEVICE_BACKEND_AUTOLOAD=0 /home/ma-user/.local/bin/yolo settings tensorboard=True\n\nWORKDIR /home/ma-user\nCMD [\"python\"]\n",
+  "dockerfilePath": "projects/yolo/Dockerfile",
+  "baseImageId": "pytorch-npu-910b",
+  "args": {
+    "BASE_IMAGE": "quay.io/service-delivery-hub/pytorch:2.5.1-cann83rc1-910b",
+    "TORCH_VERSION": "2.5.1",
+    "TORCH_NPU_VERSION": "2.5.1",
+    "TORCHVISION_VERSION": "0.20.1"
+  },
+  "purpose": "training",
+  "chip": null,
+  "cannVersion": null,
+  "experimental": false,
+  "pushedAt": "2026-03-31T03:20:08.391728+00:00",
+  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/yolo-ascend-torch251-cann83rc1/yolo-ascend-torch251-cann83rc1-910b.tar.gz",
+  "sha256": "3302e62d006fa99a0ca95c7bdc3a4ab64f3d7c7b25c2fc253068613b93352074",
+  "quayDigest": null,
+  "tier": "app",
+  "appType": "yolo",
+  "appName": "YOLO",
+  "description": "Ultralytics YOLO with Ascend NPU support"
+}

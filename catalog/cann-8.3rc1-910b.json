@@ -14,7 +14,13 @@
   "purpose": null,
   "chip": "910b",
   "cannVersion": "8.3.RC1",
-  "installType": "offline",
-  "pushedAt": "2026-03-23T09:43:27.386195+00:00",
-  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/cann/cann-8.3rc1-910b.tar.gz"
+  "experimental": false,
+  "pushedAt": "2026-03-28T01:25:23.311423+00:00",
+  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/cann/cann-8.3rc1-910b.tar.gz",
+  "sha256": "2a3d8259f4a1cc136a0deca1ceccb3a9789b2c41f5a5547b7123084936a4f8ec",
+  "quayDigest": "sha256:c0d46b050278502a358826c50d32330b7c6033e47c2f32052716a9db53b8691d",
+  "tier": "base",
+  "appType": "cann",
+  "appName": "CANN",
+  "description": "CANN 8.3 RC1 toolkit for 910B chip"
 }

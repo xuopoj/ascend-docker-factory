@@ -4,3 +4,5 @@ arxiv
 
 .DS_Store
 examples.env
+
+.env

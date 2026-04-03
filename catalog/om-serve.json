@@ -1,0 +1,19 @@
+{
+  "id": "om-serve",
+  "name": "om-serve",
+  "tag": "quay.io/service-delivery-hub/om-serve:latest-cann83rc1-910b",
+  "dockerfile": "ARG BASE_IMAGE=quay.io/service-delivery-hub/cann:8.3rc1-910b\nFROM ${BASE_IMAGE}\n\n# Add ACL Python bindings to path\nENV PYTHONPATH=/usr/local/Ascend/ascend-toolkit/latest/python/site-packages:${PYTHONPATH}\n\nUSER ma-user\n\nRUN pip install --no-cache-dir fastapi uvicorn \"numpy<2\" pillow python-multipart\n\nWORKDIR /home/ma-user\nCOPY projects/om-serve/serve.py .\nCOPY projects/om-serve/yolo_serve.py .\nCMD [\"uvicorn\", \"serve:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8000\"]\n",
+  "dockerfilePath": "projects/om-serve/Dockerfile",
+  "baseImageId": "cann-8.3rc1-910b",
+  "args": {},
+  "purpose": "inference",
+  "chip": null,
+  "cannVersion": null,
+  "pushedAt": "2026-03-27T10:09:54.234426+00:00",
+  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/om-serve/om-serve.tar.gz",
+  "sha256": "cbeeff6b44c29092ea8036acfa7e80520c296e966889d2bd857e5ce324d5f949",
+  "tier": "app",
+  "appType": "om-serve",
+  "appName": "OM Serve",
+  "description": "Generic Ascend OM model server with FastAPI"
+}

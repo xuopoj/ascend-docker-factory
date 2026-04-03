@@ -1,0 +1,25 @@
+{
+  "id": "cann-8.5.0-910b",
+  "name": "cann",
+  "tag": "quay.io/service-delivery-hub/cann:8.5.0-910b",
+  "dockerfile": "# syntax=docker/dockerfile:1\nARG BASE_IMAGE=python:3.10\nFROM ${BASE_IMAGE}\n\nARG CANN_VERSION=8.5.0\nARG CANN_BUILD_TAG=8.5.T63\nARG CHIP_TYPE=910b\n\nENV DEBIAN_FRONTEND=noninteractive\n\nUSER root\n\nRUN wget -q \"https://ascend-repo.obs.cn-east-2.myhuaweicloud.com/CANN/CANN%20${CANN_BUILD_TAG}/Ascend-cann_${CANN_VERSION}_linux-aarch64.run\" \\\n    && bash ./Ascend-cann_${CANN_VERSION}_linux-aarch64.run --install --quiet \\\n    && rm Ascend-cann_${CANN_VERSION}_linux-aarch64.run \\\n    && wget -q \"https://ascend-repo.obs.cn-east-2.myhuaweicloud.com/CANN/CANN%20${CANN_BUILD_TAG}/Ascend-cann-${CHIP_TYPE}-ops_${CANN_VERSION}_linux-aarch64.run\" \\\n    && bash ./Ascend-cann-${CHIP_TYPE}-ops_${CANN_VERSION}_linux-aarch64.run --install --quiet \\\n    && rm Ascend-cann-${CHIP_TYPE}-ops_${CANN_VERSION}_linux-aarch64.run\n\n# CANN Toolkit Environment\nENV ASCEND_TOOLKIT_HOME=/usr/local/Ascend/ascend-toolkit/latest \\\n    ASCEND_AICPU_PATH=/usr/local/Ascend/ascend-toolkit/latest \\\n    ASCEND_OPP_PATH=/usr/local/Ascend/ascend-toolkit/latest/opp \\\n    TOOLCHAIN_HOME=/usr/local/Ascend/ascend-toolkit/latest/toolkit \\\n    ASCEND_HOME_PATH=/usr/local/Ascend/ascend-toolkit/latest\nENV LD_LIBRARY_PATH=${ASCEND_TOOLKIT_HOME}/lib64:${ASCEND_TOOLKIT_HOME}/lib64/plugin/opskernel:${ASCEND_TOOLKIT_HOME}/lib64/plugin/nnengine:${ASCEND_TOOLKIT_HOME}/opp/built-in/op_impl/ai_core/tbe/op_tiling/lib/linux/aarch64:${ASCEND_TOOLKIT_HOME}/tools/aml/lib64:${ASCEND_TOOLKIT_HOME}/tools/aml/lib64/plugin\nENV PYTHONPATH=${ASCEND_TOOLKIT_HOME}/python/site-packages:${ASCEND_TOOLKIT_HOME}/opp/built-in/op_impl/ai_core/tbe\nENV PATH=${ASCEND_TOOLKIT_HOME}/bin:${ASCEND_TOOLKIT_HOME}/compiler/ccec_compiler/bin:${ASCEND_TOOLKIT_HOME}/tools/ccec_compiler/bin:${PATH}\n\n# Ascend Driver Environment (host-mounted at runtime via device plugin)\nENV ASCEND_DRIVER_HOME=/usr/local/Ascend/driver\nENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${ASCEND_DRIVER_HOME}/lib64:${ASCEND_DRIVER_HOME}/lib64/driver\nENV PATH=${PATH}:${ASCEND_DRIVER_HOME}/bin\n\nRUN { \\\n    echo '# CANN Toolkit'; \\\n    echo 'export ASCEND_TOOLKIT_HOME=/usr/local/Ascend/ascend-toolkit/latest'; \\\n    echo 'export ASCEND_AICPU_PATH=$ASCEND_TOOLKIT_HOME'; \\\n    echo 'export ASCEND_OPP_PATH=$ASCEND_TOOLKIT_HOME/opp'; \\\n    echo 'export TOOLCHAIN_HOME=$ASCEND_TOOLKIT_HOME/toolkit'; \\\n    echo 'export ASCEND_HOME_PATH=$ASCEND_TOOLKIT_HOME'; \\\n    echo 'export LD_LIBRARY_PATH=$ASCEND_TOOLKIT_HOME/lib64:$ASCEND_TOOLKIT_HOME/lib64/plugin/opskernel:$ASCEND_TOOLKIT_HOME/lib64/plugin/nnengine:$ASCEND_TOOLKIT_HOME/opp/built-in/op_impl/ai_core/tbe/op_tiling/lib/linux/aarch64:$ASCEND_TOOLKIT_HOME/tools/aml/lib64:$ASCEND_TOOLKIT_HOME/tools/aml/lib64/plugin'; \\\n    echo 'export PYTHONPATH=$ASCEND_TOOLKIT_HOME/python/site-packages:$ASCEND_TOOLKIT_HOME/opp/built-in/op_impl/ai_core/tbe'; \\\n    echo ''; \\\n    echo '# Ascend Driver (host-mounted at runtime)'; \\\n    echo 'export ASCEND_DRIVER_HOME=/usr/local/Ascend/driver'; \\\n    echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ASCEND_DRIVER_HOME/lib64:$ASCEND_DRIVER_HOME/lib64/driver'; \\\n    echo ''; \\\n    echo '# PATH (with dedup guard)'; \\\n    echo 'case \":$PATH:\" in *\":$ASCEND_TOOLKIT_HOME/bin:\"*) ;; *) export PATH=$ASCEND_TOOLKIT_HOME/bin:$ASCEND_TOOLKIT_HOME/compiler/ccec_compiler/bin:$ASCEND_TOOLKIT_HOME/tools/ccec_compiler/bin:$PATH ;; esac'; \\\n    echo 'case \":$PATH:\" in *\":$ASCEND_DRIVER_HOME/bin:\"*) ;; *) export PATH=$PATH:$ASCEND_DRIVER_HOME/bin ;; esac'; \\\n    } > /etc/profile.d/ascend.sh && \\\n    cp /etc/profile.d/ascend.sh /etc/ascend-env.sh && \\\n    echo '. /etc/ascend-env.sh' >> /etc/bash.bashrc\n\nLABEL com.ascend.chip=${CHIP_TYPE} \\\n      com.ascend.cann.version=${CANN_VERSION}\n",
+  "dockerfilePath": "dockerfiles/cann-8.5.dockerfile",
+  "baseImageId": "python-3.10",
+  "args": {
+    "CANN_VERSION": "8.5.0",
+    "CANN_BUILD_TAG": "8.5.T63",
+    "CHIP_TYPE": "910b"
+  },
+  "purpose": "both",
+  "chip": "910b",
+  "cannVersion": "8.5.0",
+  "experimental": true,
+  "pushedAt": "2026-03-28T09:54:17.474260+00:00",
+  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/cann/cann-8.5.0-910b.tar.gz",
+  "sha256": "07e69ff820cfd47123a67777068efab74d7f91e3977072367eb4dfdf4c9457d8",
+  "quayDigest": "sha256:d05e286f9113ea778240f7596ef4a7d79506bb2c23edc5e467dc5b9fd51114f8",
+  "tier": "base",
+  "appType": "cann",
+  "appName": "CANN",
+  "description": "CANN 8.5.0 with online installer, supports 910B chip"
+}

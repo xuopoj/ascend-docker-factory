@@ -14,7 +14,12 @@
   "purpose": null,
   "chip": null,
   "cannVersion": null,
-  "installType": "offline",
-  "pushedAt": "2026-03-22T15:35:45.888520+00:00",
-  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/python/python-3.11.tar.gz"
+  "pushedAt": "2026-03-28T01:12:40.812305+00:00",
+  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/python/python-3.11.tar.gz",
+  "sha256": "ffb74d370a43138842bbf0623aaa29f54e661955aed805678a6392718bb1195e",
+  "quayDigest": "sha256:db99afc7e1464435aa29f998b646ee38ffcc51476610c8296743b4a8b65647dd",
+  "tier": "base",
+  "appType": "python",
+  "appName": "Python",
+  "description": "Python base image with common tools"
 }

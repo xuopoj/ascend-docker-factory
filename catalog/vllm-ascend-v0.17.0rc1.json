@@ -12,7 +12,13 @@
   "purpose": "inference",
   "chip": null,
   "cannVersion": null,
-  "installType": "offline",
-  "pushedAt": "2026-03-22T03:58:48.211063+00:00",
-  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/vllm-ascend/vllm-ascend-v0.17.0rc1.tar.gz"
+  "experimental": false,
+  "pushedAt": "2026-03-30T15:05:53.966559+00:00",
+  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/vllm-ascend/vllm-ascend-v0.17.0rc1.tar.gz",
+  "sha256": "ae6150c48bcebe58a9f175d6a18699c1543af3d72da6aaf2871c0911b3766016",
+  "quayDigest": "sha256:3ae4b26105b6d6e11c66d943ad479813d754b6ab8693838f764477c3b919f4fc",
+  "tier": "app",
+  "appType": "vllm",
+  "appName": "vLLM",
+  "description": "High-performance LLM inference framework"
 }

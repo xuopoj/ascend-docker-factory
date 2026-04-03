@@ -16,6 +16,10 @@ version: "1.0"
 images:
   # ================= Base Images =================
   python:
+    tier: base
+    app_type: python
+    app_name: "Python"
+    description: "Python base image with common tools"
     matrix:
       PYTHON_VERSION: ["3.10", "3.11"]
     build:
@@ -27,9 +31,25 @@ images:
         INCLUDE_DEBUG_TOOLS: "true"
     tags:
       - "quay.io/service-delivery-hub/python:{PYTHON_VERSION}"
+
+  python-3.9:
+    tier: base
+    app_type: python
+    app_name: "Python"
+    description: "Python 3.9 base image with common tools"
+    build:
+      context: .
+      dockerfile: dockerfiles/python39.dockerfile
+      args:
+        BASE_IMAGE: "ubuntu:22.04"
+        PIP_INDEX_URL: "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple"
+        INCLUDE_DEBUG_TOOLS: "true"
+    tags:
+      - "quay.io/service-delivery-hub/python:3.9"
   # ================= Machine Learning Images =================
   ml-basic:
-    purpose: training  # training, inference, or both
+    tier: base
+    purpose: training
     app_type: ml-basic
     app_name: "ML Basic"
     description: "Scikit-learn, XGBoost, traditional ML algorithms"
@@ -43,9 +63,10 @@ images:
 
   # ================= PyTorch Images =================
   pytorch-cpu:
+    tier: base
     purpose: both
     app_type: pytorch
-    app_name: "PyTorch Base"
+    app_name: "PyTorch"
     description: "General-purpose deep learning framework"
     depends_on:
       - python-3.10
@@ -61,6 +82,11 @@ images:
   # ================= CANN Images (≤8.3, offline install) =================
   # Packages must be placed in packages/<CANN_VERSION>/ before building.
   cann-8.0rc1-910b:
+    tier: base
+    purpose: both
+    app_type: cann
+    app_name: "CANN"
+    description: "CANN 8.0 RC1 toolkit for 910B chip"
     depends_on:
       - python-3.10
     build:
@@ -74,7 +100,31 @@ images:
     tags:
       - "quay.io/service-delivery-hub/cann:8.0rc1-910b"
 
+  cann-8.0rc1-910b-py39:
+    tier: base
+    purpose: both
+    app_type: cann
+    app_name: "CANN"
+    description: "CANN 8.0 RC1 toolkit for 910B chip (Python 3.9)"
+    depends_on:
+      - python-3.9
+    build:
+      context: .
+      dockerfile: dockerfiles/cann.dockerfile
+      args:
+        CANN_VERSION: "8.0.RC1"
+        CHIP_TYPE: "910b"
+        DRIVER_VERSION: "24.1.1"
+        INSTALL_COMPONENTS: "toolkit,kernels"
+    tags:
+      - "quay.io/service-delivery-hub/cann:8.0rc1-910b-py39"
+
   cann-8.2rc1-910b:
+    tier: base
+    purpose: both
+    app_type: cann
+    app_name: "CANN"
+    description: "CANN 8.2 RC1 toolkit for 910B chip"
     depends_on:
       - python-3.10
     build:
@@ -89,6 +139,11 @@ images:
       - "quay.io/service-delivery-hub/cann:8.2rc1-910b"
 
   cann-8.3rc1-910b:
+    tier: base
+    purpose: both
+    app_type: cann
+    app_name: "CANN"
+    description: "CANN 8.3 RC1 toolkit for 910B chip"
     depends_on:
       - python-3.10
     build:
@@ -103,6 +158,11 @@ images:
       - "quay.io/service-delivery-hub/cann:8.3rc1-910b"
 
   cann-8.3rc1-310p:
+    tier: base
+    purpose: both
+    app_type: cann
+    app_name: "CANN"
+    description: "CANN 8.3 RC1 toolkit for 310P chip"
     depends_on:
       - python-3.10
     build:
@@ -119,7 +179,9 @@ images:
   # ================= CANN Images (8.5+, online install) =================
   # Packages are downloaded from Huawei OBS during build.
   cann-8.5.0-910b:
+    tier: base
     purpose: both
+    experimental: true
     app_type: cann
     app_name: "CANN"
     description: "CANN 8.5.0 with online installer, supports 910B chip"
@@ -136,9 +198,11 @@ images:
       - "quay.io/service-delivery-hub/cann:8.5.0-910b"
 
   pytorch-npu-910b-cann850:
+    tier: base
     purpose: training
+    experimental: true
     app_type: pytorch
-    app_name: "PyTorch Base"
+    app_name: "PyTorch"
     description: "General deep learning framework with NPU acceleration (910B, CANN 8.5)"
     depends_on:
       - cann-8.5.0-910b
@@ -153,9 +217,11 @@ images:
       - "quay.io/service-delivery-hub/pytorch:2.5.1-cann850-910b"
 
   pytorch-npu-910b-cann850-torch290:
+    tier: base
     purpose: training
+    experimental: true
     app_type: pytorch
-    app_name: "PyTorch Base"
+    app_name: "PyTorch"
     description: "PyTorch 2.9.0 with NPU acceleration (910B, CANN 8.5)"
     depends_on:
       - cann-8.5.0-910b
@@ -170,9 +236,10 @@ images:
       - "quay.io/service-delivery-hub/pytorch:2.9.0-cann850-910b"
 
   pytorch-npu-910b:
+    tier: base
     purpose: training
     app_type: pytorch
-    app_name: "PyTorch Base"
+    app_name: "PyTorch"
     description: "General deep learning framework with NPU acceleration (910B)"
     depends_on:
       - cann-8.3rc1-910b
@@ -187,9 +254,10 @@ images:
       - "quay.io/service-delivery-hub/pytorch:2.5.1-cann83rc1-910b"
 
   pytorch-npu-310p:
+    tier: base
     purpose: inference
     app_type: pytorch
-    app_name: "PyTorch Base"
+    app_name: "PyTorch"
     description: "General deep learning framework with NPU acceleration (310P)"
     depends_on:
       - cann-8.3rc1-310p
@@ -205,9 +273,10 @@ images:
 
   # ================= Inference Runtimes =================
   vllm-ascend:
+    tier: app
     purpose: inference
     app_type: vllm
-    app_name: "vLLM Runtime"
+    app_name: "vLLM"
     description: "High-performance LLM inference framework"
     standalone: true
     matrix:
@@ -221,24 +290,93 @@ images:
       - "quay.io/service-delivery-hub/vllm-ascend:{BASE_IMAGE}"
 
   # ================= Projects =================
-  yolo-ascend:
-    purpose: training
-    app_type: yolo
-    app_name: "YOLO Ascend"
-    description: "Ultralytics YOLO with Ascend NPU support"
+  om-serve:
+    tier: app
+    purpose: inference
+    app_type: om-serve
+    app_name: "OM Serve"
+    description: "Generic Ascend OM model server with FastAPI"
     depends_on:
-      - pytorch-npu-910b
+      - cann-8.3rc1-910b
     build:
       context: .
-      dockerfile: projects/yolo/yolo.dockerfile
+      dockerfile: projects/om-serve/Dockerfile
     tags:
-      - "quay.io/service-delivery-hub/yolo-ascend:latest-torch251-cann83rc1-910b"
+      - "quay.io/service-delivery-hub/om-serve:latest-cann83rc1-910b"
+
+  yolo-detect:
+    tier: app
+    purpose: inference
+    app_type: yolo-detect
+    app_name: "YOLO Detect"
+    description: "YOLO object detection inference server for Ascend OM models"
+    depends_on:
+      - cann-8.3rc1-910b
+    build:
+      context: .
+      dockerfile: projects/om-serve/Dockerfile
+    tags:
+      - "quay.io/service-delivery-hub/om-serve:latest-cann83rc1-910b"
+
+
+  yolo-ascend:
+    tier: app
+    purpose: training
+    app_type: yolo
+    app_name: "YOLO"
+    description: "Ultralytics YOLO with Ascend NPU support"
+    matrix:
+      - BASE_IMAGE: "quay.io/service-delivery-hub/pytorch:2.5.1-cann83rc1-910b"
+        TORCH_VERSION: "2.5.1"
+        TORCH_NPU_VERSION: "2.5.1"
+        TORCHVISION_VERSION: "0.20.1"
+        _tag_suffix: "torch251-cann83rc1-910b"
+        _depends_on: "pytorch-npu-910b"
+      - BASE_IMAGE: "quay.io/service-delivery-hub/pytorch:2.9.0-cann850-910b"
+        TORCH_VERSION: "2.9.0"
+        TORCH_NPU_VERSION: "2.9.0"
+        TORCHVISION_VERSION: "0.24.0"
+        _tag_suffix: "torch290-cann850-910b"
+        _depends_on: "pytorch-npu-910b-cann850-torch290"
+        _experimental: true
+    build:
+      context: .
+      dockerfile: projects/yolo/Dockerfile
+    tags:
+      - "quay.io/service-delivery-hub/yolo-ascend:latest-{_tag_suffix}"
+
+  nanochat:
+    tier: app
+    purpose: training
+    app_type: nanochat
+    app_name: "Nanochat"
+    description: "Minimal LLM training harness with Ascend NPU support"
+    matrix:
+      - BASE_IMAGE: "quay.io/service-delivery-hub/pytorch:2.5.1-cann83rc1-910b"
+        TORCH_VERSION: "2.5.1"
+        TORCH_NPU_VERSION: "2.5.1"
+        TORCHVISION_VERSION: "0.20.1"
+        _tag_suffix: "torch251-cann83rc1-910b"
+        _depends_on: "pytorch-npu-910b"
+      - BASE_IMAGE: "quay.io/service-delivery-hub/pytorch:2.9.0-cann850-910b"
+        TORCH_VERSION: "2.9.0"
+        TORCH_NPU_VERSION: "2.9.0"
+        TORCHVISION_VERSION: "0.24.0"
+        _tag_suffix: "torch290-cann850-910b"
+        _depends_on: "pytorch-npu-910b-cann850-torch290"
+        _experimental: true
+    build:
+      context: .
+      dockerfile: projects/nanochat/nanochat.dockerfile
+    tags:
+      - "quay.io/service-delivery-hub/nanochat:latest-{_tag_suffix}"
 
   # ================= Framework-Level Tools =================
   # Note: App-specific images (YOLO, Flask, Chronos, etc.) should be built
   # manually from projects/ directory. See README.md for examples.
 
   msmodelslim:
+    tier: app
     purpose: training
     app_type: msmodelslim
     app_name: "MSModelSlim"

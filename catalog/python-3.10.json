@@ -14,7 +14,12 @@
   "purpose": null,
   "chip": null,
   "cannVersion": null,
-  "installType": "offline",
-  "pushedAt": "2026-03-23T09:11:27.172446+00:00",
-  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/python/python-3.10.tar.gz"
+  "pushedAt": "2026-03-28T01:03:03.338366+00:00",
+  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/python/python-3.10.tar.gz",
+  "sha256": "1628d4d5a61c3a036f7d2d6caf5081beecd7459fe96c5599b4725149ec4c05fc",
+  "quayDigest": "sha256:8e35d39da422368fc1e94ece02b454fcfaba1d9a5408f0bd6d983b3b307d4f52",
+  "tier": "base",
+  "appType": "python",
+  "appName": "Python",
+  "description": "Python base image with common tools"
 }

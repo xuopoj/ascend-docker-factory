@@ -1,0 +1,18 @@
+{
+  "id": "om-serve-310p",
+  "name": "om-serve",
+  "tag": "quay.io/service-delivery-hub/om-serve:latest-cann83rc1-310p",
+  "dockerfile": "ARG BASE_IMAGE=quay.io/service-delivery-hub/cann:8.3rc1-310p\nFROM ${BASE_IMAGE}\n\n# Add ACL Python bindings to path\nENV PYTHONPATH=/usr/local/Ascend/ascend-toolkit/latest/python/site-packages:${PYTHONPATH}\n\nUSER ma-user\n\nRUN pip install --no-cache-dir fastapi uvicorn \"numpy<2\" pillow python-multipart\n\nWORKDIR /home/ma-user\nCOPY projects/om-serve/serve.py .\nCOPY projects/om-serve/yolo_serve.py .\nCMD [\"uvicorn\", \"serve:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8000\"]\n",
+  "dockerfilePath": "projects/om-serve/Dockerfile",
+  "baseImageId": "cann-8.3rc1-310p",
+  "args": {},
+  "purpose": "inference",
+  "chip": "310p",
+  "cannVersion": "8.3.RC1",
+  "pushedAt": "2026-04-03T00:00:00.000000+00:00",
+  "quayDigest": "sha256:00edc005127f26506b2035b2c1bb3f6470ddf049c2c83d538fc77709ace084c8",
+  "tier": "app",
+  "appType": "om-serve",
+  "appName": "OM Serve",
+  "description": "Generic Ascend OM model server with FastAPI"
+}

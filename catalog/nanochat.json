@@ -1,0 +1,21 @@
+{
+  "id": "nanochat",
+  "name": "nanochat",
+  "tag": "quay.io/service-delivery-hub/nanochat:latest-torch290-cann850-910b",
+  "dockerfile": "ARG BASE_IMAGE=quay.io/service-delivery-hub/pytorch:2.9.0-cann850-910b\nFROM ${BASE_IMAGE}\n\nUSER ma-user\n\n# Clone nanochat ascend fork in editable mode\nRUN git clone -b ascend https://github.com/xuopoj/nanochat.git /home/ma-user/xuopoj/nanochat && \\\n    pip install --no-cache-dir -e /home/ma-user/xuopoj/nanochat && \\\n    pip install --no-cache-dir --force-reinstall torch==2.9.0 torchvision==0.24.0 && \\\n    pip install --no-cache-dir --no-deps torch_npu==2.9.0 && \\\n    # Pre-cache tiktoken encodings so tok_eval works offline\n    python -c \"import tiktoken; tiktoken.get_encoding('gpt2'); tiktoken.get_encoding('cl100k_base')\"\n\nWORKDIR /home/ma-user\nCMD [\"python\"]\n",
+  "dockerfilePath": "projects/nanochat/nanochat.dockerfile",
+  "baseImageId": "pytorch-npu-910b",
+  "args": {},
+  "purpose": "training",
+  "chip": null,
+  "cannVersion": null,
+  "experimental": false,
+  "pushedAt": "2026-03-30T15:15:43.039357+00:00",
+  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/nanochat/nanochat.tar.gz",
+  "sha256": "fce6c1e4aad863d87466a1b9de1cf0f1615b6fd747210039351370a22528ad48",
+  "quayDigest": "sha256:7fa01c642e6eea68218d7d6ee64d075860a32745d9c6312968a284d73ca15acc",
+  "tier": "app",
+  "appType": "nanochat",
+  "appName": "Nanochat",
+  "description": "Minimal LLM training harness with Ascend NPU support"
+}

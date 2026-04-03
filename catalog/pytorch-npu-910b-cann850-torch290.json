@@ -1,0 +1,25 @@
+{
+  "id": "pytorch-npu-910b-cann850-torch290",
+  "name": "pytorch",
+  "tag": "quay.io/service-delivery-hub/pytorch:2.9.0-cann850-910b",
+  "dockerfile": "ARG BASE_IMAGE=cann:83rc1-python310\nFROM ${BASE_IMAGE}\n\nARG TORCH_VERSION=2.9.0\nARG TORCH_NPU_VERSION=2.9.0\nARG TORCHVISION_VERSION=0.24.0\n\nUSER ma-user\n\n# Install Python packages (uses global pip config from base image)\nRUN pip install --no-cache-dir attrs cython numpy==1.26.4 decorator sympy cffi pyyaml \\\n    pathlib2 psutil protobuf==3.20 scipy requests absl-py pyyaml wheel typing_extensions \\\n    tensorboard matplotlib ipykernel \"transformers>=4.41,<5\"\n    \nRUN pip install --no-cache-dir datasets tiktoken wandb tqdm libcst\n\n# install pytorch: install torch first to get the correct aarch64 wheel,\n# then torch_npu with --no-deps to avoid it pulling torch+cpu as a dependency\nRUN pip install --no-cache-dir torch==${TORCH_VERSION} torchvision==${TORCHVISION_VERSION} && \\\n    pip install --no-cache-dir --no-deps torch_npu==${TORCH_NPU_VERSION}\n\nCMD [\"python\"]\n",
+  "dockerfilePath": "dockerfiles/pytorch-npu.dockerfile",
+  "baseImageId": "cann-8.5.0-910b",
+  "args": {
+    "TORCH_VERSION": "2.9.0",
+    "TORCH_NPU_VERSION": "2.9.0",
+    "TORCHVISION_VERSION": "0.24.0"
+  },
+  "purpose": "training",
+  "chip": null,
+  "cannVersion": null,
+  "experimental": true,
+  "pushedAt": "2026-03-29T00:51:19.769036+00:00",
+  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/pytorch-npu/pytorch-npu-910b-cann850-torch290.tar.gz",
+  "sha256": "129bad982f0d29581e9ff01295dea7f7381edb9186a0385228cc0945fd19daba",
+  "quayDigest": null,
+  "tier": "base",
+  "appType": "pytorch",
+  "appName": "PyTorch",
+  "description": "PyTorch 2.9.0 with NPU acceleration (910B, CANN 8.5)"
+}

@@ -14,7 +14,13 @@
   "purpose": null,
   "chip": "310p",
   "cannVersion": "8.3.RC1",
-  "installType": "offline",
-  "pushedAt": "2026-03-23T02:41:16.813159+00:00",
-  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/cann/cann-8.3rc1-310p.tar.gz"
+  "experimental": false,
+  "pushedAt": "2026-03-28T01:37:06.639356+00:00",
+  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/cann/cann-8.3rc1-310p.tar.gz",
+  "sha256": "2826ff5ce7cbcef7c0926a37d1fff78707ba05b806976e094ea4bf980c5339d5",
+  "quayDigest": "sha256:19cc681adb607782df6843d84d5483a2988a8838bd261c2698f3d66c96966916",
+  "tier": "base",
+  "appType": "cann",
+  "appName": "CANN",
+  "description": "CANN 8.3 RC1 toolkit for 310P chip"
 }
