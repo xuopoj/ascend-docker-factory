@@ -1,0 +1,24 @@
+{
+  "id": "vllm-ascend-v0.18.0rc1",
+  "name": "vllm",
+  "tag": "quay.io/service-delivery-hub/vllm-ascend:v0.18.0rc1",
+  "dockerfile": "ARG BASE_IMAGE=v0.18.0rc1\nFROM quay.io/ascend/vllm-ascend:${BASE_IMAGE}\n\nARG INCLUDE_DEBUG_TOOLS=true\n\n# Install debugging and network tools (optional)\nRUN if [ \"$INCLUDE_DEBUG_TOOLS\" = \"true\" ]; then \\\n    apt-get update && apt-get install -y \\\n        curl \\\n        wget \\\n        net-tools \\\n        netstat-nat \\\n        iperf3 \\\n        tcpdump \\\n        htop \\\n        iotop \\\n        sysstat \\\n        procps \\\n        iputils-ping \\\n        traceroute \\\n        nload \\\n        && rm -rf /var/lib/apt/lists/*; \\\n    fi\n\nRUN useradd -m -d /home/ma-user -s /bin/bash -g 100 -u 1000 ma-user\nUSER ma-user\nWORKDIR /home/ma-user\n",
+  "dockerfilePath": "dockerfiles/vllm.dockerfile",
+  "baseImageId": null,
+  "args": {
+    "INCLUDE_DEBUG_TOOLS": "true",
+    "BASE_IMAGE": "v0.18.0rc1"
+  },
+  "purpose": "inference",
+  "chip": null,
+  "cannVersion": null,
+  "experimental": false,
+  "pushedAt": "2026-04-19T10:35:00+00:00",
+  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/vllm-ascend/vllm-ascend-v0.18.0rc1.tar.gz",
+  "sha256": "657ae8e8c1b9e90ee734c7104a9fa974bd3b75881b7fc43c80d06091c232baae",
+  "quayDigest": "sha256:a86392a2c8546cff999cdaf3c5c9304226ff4cee63af2907628a19643bc9b883",
+  "tier": "app",
+  "appType": "vllm",
+  "appName": "vLLM",
+  "description": "High-performance LLM inference framework"
+}
