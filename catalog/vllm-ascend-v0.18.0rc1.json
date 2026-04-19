@@ -9,16 +9,16 @@
     "INCLUDE_DEBUG_TOOLS": "true",
     "BASE_IMAGE": "v0.18.0rc1"
   },
+  "tier": "app",
   "purpose": "inference",
+  "appType": "vllm",
+  "appName": "vLLM",
+  "description": "High-performance LLM inference framework",
   "chip": null,
   "cannVersion": null,
   "experimental": false,
-  "pushedAt": "2026-04-19T10:35:00+00:00",
+  "pushedAt": "2026-04-19T08:41:58.404963+00:00",
   "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/vllm-ascend/vllm-ascend-v0.18.0rc1.tar.gz",
-  "sha256": "657ae8e8c1b9e90ee734c7104a9fa974bd3b75881b7fc43c80d06091c232baae",
-  "quayDigest": "sha256:a86392a2c8546cff999cdaf3c5c9304226ff4cee63af2907628a19643bc9b883",
-  "tier": "app",
-  "appType": "vllm",
-  "appName": "vLLM",
-  "description": "High-performance LLM inference framework"
+  "sha256": "2dd93f1e2054e3ad386549a8844afa97b94069d10170fa910b95626677fcd198",
+  "quayDigest": "sha256:a86392a2c8546cff999cdaf3c5c9304226ff4cee63af2907628a19643bc9b883"
 }
