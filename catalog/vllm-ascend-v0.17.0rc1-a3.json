@@ -1,0 +1,24 @@
+{
+  "id": "vllm-ascend-v0.17.0rc1-a3",
+  "name": "vllm",
+  "tag": "quay.io/service-delivery-hub/vllm-ascend:v0.17.0rc1-a3",
+  "dockerfile": "ARG BASE_IMAGE=v0.17.0rc1-a3\nFROM quay.io/ascend/vllm-ascend:${BASE_IMAGE}\n\nARG INCLUDE_DEBUG_TOOLS=true\n\n# Install debugging and network tools (optional)\nRUN if [ \"$INCLUDE_DEBUG_TOOLS\" = \"true\" ]; then \\\n    sed -i 's|http://ports.ubuntu.com/ubuntu-ports|https://mirrors.tuna.tsinghua.edu.cn/ubuntu-ports|g' /etc/apt/sources.list && \\\n    apt-get update && apt-get install -y \\\n        curl \\\n        wget \\\n        net-tools \\\n        netstat-nat \\\n        iperf3 \\\n        tcpdump \\\n        htop \\\n        iotop \\\n        sysstat \\\n        procps \\\n        iputils-ping \\\n        traceroute \\\n        nload \\\n        && rm -rf /var/lib/apt/lists/*; \\\n    fi\n\nRUN useradd -m -d /home/ma-user -s /bin/bash -g 100 -u 1000 ma-user\nUSER ma-user\nWORKDIR /home/ma-user\n",
+  "dockerfilePath": "dockerfiles/vllm.dockerfile",
+  "baseImageId": null,
+  "args": {
+    "INCLUDE_DEBUG_TOOLS": "true",
+    "BASE_IMAGE": "v0.17.0rc1-a3"
+  },
+  "tier": "app",
+  "purpose": "inference",
+  "appType": "vllm",
+  "appName": "vLLM",
+  "description": "High-performance LLM inference framework",
+  "chip": null,
+  "cannVersion": null,
+  "experimental": false,
+  "pushedAt": "2026-04-24T09:34:16.401693+00:00",
+  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/vllm-ascend/vllm-ascend-v0.17.0rc1-a3.tar.gz",
+  "sha256": "aa0750a5430e4b2d3c3f7126d2a7bda7e5ecd179ed1edf0ee3d5c27e523e8566",
+  "quayDigest": "sha256:88c606725d1e10b30c3fa0372a05d0d777ccbd6ccdfc52fe15e0e1ca65e15155"
+}

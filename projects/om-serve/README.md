@@ -4,9 +4,10 @@ Generic Ascend OM model server with FastAPI. Includes a YOLO-specific server wit
 
 ## Images
 
-| Tag | Base |
-|-----|------|
-| `om-serve:latest-cann83rc1-910b` | CANN 8.3RC1 |
+| Tag | Chip | Base |
+|-----|------|------|
+| `om-serve:latest-cann83rc1-910b` | 910B | CANN 8.3RC1 |
+| `om-serve:latest-cann83rc1-310p` | 310P | CANN 8.3RC1 |
 
 ## Start the server
 
