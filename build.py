@@ -379,6 +379,35 @@ def _update_images_jsonl(api, repo_id, image_name, image_config, path_in_repo, d
     )
     print(f"📋 images.jsonl updated on ModelScope")
 
+    _sync_dataset_readme(api, repo_id)
+
+def _sync_dataset_readme(api, repo_id):
+    """Upload modelscope-readme.md as the dataset README if its content has changed."""
+    import urllib.request
+    readme_src = Path(__file__).parent / "modelscope-readme.md"
+    if not readme_src.exists():
+        return
+
+    local = readme_src.read_bytes()
+    namespace, dataset = repo_id.split("/", 1)
+    try:
+        url = api.get_dataset_file_url(file_name="README.md", dataset_name=dataset, namespace=namespace)
+        with urllib.request.urlopen(url) as resp:
+            remote = resp.read()
+        if remote == local:
+            return
+    except Exception:
+        pass  # README missing on remote — upload it
+
+    api.upload_file(
+        path_or_fileobj=local,
+        path_in_repo="README.md",
+        repo_id=repo_id,
+        repo_type="dataset",
+        commit_message="Sync README from modelscope-readme.md",
+    )
+    print("📝 README.md synced to ModelScope")
+
 def build_image(image_name, image_config, all_images):
     print(f"\n📦 Building {image_name}")
 
