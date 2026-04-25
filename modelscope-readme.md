@@ -63,6 +63,9 @@ tags:
 | v0.14.0rc1 | `quay.io/service-delivery-hub/vllm-ascend:v0.14.0rc1` | [vllm-ascend-v0.14.0rc1.tar.gz](vllm-ascend/vllm-ascend-v0.14.0rc1.tar.gz) |
 | v0.15.0rc1 | `quay.io/service-delivery-hub/vllm-ascend:v0.15.0rc1` | [vllm-ascend-v0.15.0rc1.tar.gz](vllm-ascend/vllm-ascend-v0.15.0rc1.tar.gz) |
 | v0.17.0rc1 | `quay.io/service-delivery-hub/vllm-ascend:v0.17.0rc1` | [vllm-ascend-v0.17.0rc1.tar.gz](vllm-ascend/vllm-ascend-v0.17.0rc1.tar.gz) |
+| v0.17.0rc1-a3 | `quay.io/service-delivery-hub/vllm-ascend:v0.17.0rc1-a3` | [vllm-ascend-v0.17.0rc1-a3.tar.gz](vllm-ascend/vllm-ascend-v0.17.0rc1-a3.tar.gz) |
+| v0.18.0rc1 | `quay.io/service-delivery-hub/vllm-ascend:v0.18.0rc1` | [vllm-ascend-v0.18.0rc1.tar.gz](vllm-ascend/vllm-ascend-v0.18.0rc1.tar.gz) |
+| v0.18.0rc1-a3 | `quay.io/service-delivery-hub/vllm-ascend:v0.18.0rc1-a3` | [vllm-ascend-v0.18.0rc1-a3.tar.gz](vllm-ascend/vllm-ascend-v0.18.0rc1-a3.tar.gz) |
 
 ---
 
