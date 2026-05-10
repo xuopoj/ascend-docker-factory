@@ -280,7 +280,7 @@ images:
     description: "High-performance LLM inference framework"
     standalone: true
     matrix:
-      BASE_IMAGE: ["v0.13.0", "v0.14.0rc1", "v0.15.0rc1", "v0.16.0rc1", "v0.17.0rc1", "v0.17.0rc1-a3", "v0.18.0rc1", "v0.18.0rc1-a3"]
+      BASE_IMAGE: ["v0.13.0", "v0.14.0rc1", "v0.15.0rc1", "v0.16.0rc1", "v0.17.0rc1", "v0.17.0rc1-a3", "v0.18.0rc1", "v0.18.0rc1-a3", "deepseekv4"]
     build:
       context: .
       dockerfile: dockerfiles/vllm.dockerfile
