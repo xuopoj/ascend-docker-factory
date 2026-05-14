@@ -2,7 +2,7 @@
   "id": "vllm-ascend-deepseekv4",
   "name": "vllm",
   "tag": "quay.io/service-delivery-hub/vllm-ascend:deepseekv4",
-  "dockerfile": "ARG BASE_IMAGE=deepseekv4\nFROM quay.io/ascend/vllm-ascend:${BASE_IMAGE}\n\nARG INCLUDE_DEBUG_TOOLS=true\n\n# Install debugging and network tools (optional)\nRUN if [ \"$INCLUDE_DEBUG_TOOLS\" = \"true\" ]; then \\\n    apt-get update && apt-get install -y \\\n        curl \\\n        wget \\\n        net-tools \\\n        netstat-nat \\\n        iperf3 \\\n        tcpdump \\\n        htop \\\n        iotop \\\n        sysstat \\\n        procps \\\n        iputils-ping \\\n        traceroute \\\n        nload \\\n        && rm -rf /var/lib/apt/lists/*; \\\n    fi\n\nRUN useradd -m -d /home/ma-user -s /bin/bash -g 100 -u 1000 ma-user\nUSER ma-user\nWORKDIR /home/ma-user\n",
+  "dockerfile": "ARG BASE_IMAGE=deepseekv4\nFROM quay.io/ascend/vllm-ascend:${BASE_IMAGE}\n\nARG INCLUDE_DEBUG_TOOLS=true\n\n# Install debugging and network tools (optional)\nRUN if [ \"$INCLUDE_DEBUG_TOOLS\" = \"true\" ]; then \\\n    apt-get update && apt-get install -y \\\n        curl \\\n        wget \\\n        net-tools \\\n        netstat-nat \\\n        iperf3 \\\n        tcpdump \\\n        htop \\\n        iotop \\\n        sysstat \\\n        procps \\\n        iputils-ping \\\n        traceroute \\\n        nload \\\n        && rm -rf /var/lib/apt/lists/*; \\\n    fi\n\n# The base image installs vllm-ascend's prebuilt custom CANN ops (e.g.\n# aclnnAddRmsNormBias, used by DeepSeek-V4's RMSNorm + several fusion passes)\n# under /vllm-workspace/vllm-ascend/vllm_ascend/_cann_ops_custom with\n# 0750 perms owned by root:root. When we switch USER to a non-root ma-user\n# below, CANN can no longer dlopen libcust_opapi.so or read the ascend910b\n# kernel binaries, which surfaces at first dispatch as:\n#     \"aclnnAddRmsNormBias op not found\"\n# Grant others read + directory-traverse (capital X only adds x to dirs,\n# leaving regular files' exec bits alone).\nRUN chmod -R o+rX /vllm-workspace/vllm-ascend/vllm_ascend/_cann_ops_custom\n\nRUN useradd -m -d /home/ma-user -s /bin/bash -g 100 -u 1000 ma-user\nUSER ma-user\nWORKDIR /home/ma-user\n",
   "dockerfilePath": "dockerfiles/vllm.dockerfile",
   "baseImageId": null,
   "args": {
@@ -17,8 +17,8 @@
   "chip": null,
   "cannVersion": null,
   "experimental": false,
-  "pushedAt": "2026-05-10T16:33:59.496866+00:00",
+  "pushedAt": "2026-05-14T17:11:34.741556+00:00",
   "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/vllm-ascend-deepseekv4/vllm-ascend-deepseekv4.tar.gz",
-  "sha256": "4eebc4a0aaef448bae44c933c5a5b19593dd084870525f15234ced0ea58fb3af",
+  "sha256": "5e78220e70055ef19cf2393c9e057544e6c1c8a99da915728e13c80bd8ea81ea",
   "quayDigest": "sha256:f505d4f81b6bf0d5ce03fd09d9f69b40868b58b36a4ec01263c3791779f6dc52"
 }
