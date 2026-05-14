@@ -17,8 +17,8 @@
   "chip": null,
   "cannVersion": null,
   "experimental": false,
-  "pushedAt": "2026-05-14T17:11:34.741556+00:00",
+  "pushedAt": "2026-05-14T18:08:33.445751+00:00",
   "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/vllm-ascend-deepseekv4/vllm-ascend-deepseekv4.tar.gz",
-  "sha256": "5e78220e70055ef19cf2393c9e057544e6c1c8a99da915728e13c80bd8ea81ea",
-  "quayDigest": "sha256:f505d4f81b6bf0d5ce03fd09d9f69b40868b58b36a4ec01263c3791779f6dc52"
+  "sha256": "8ed1aa6e48db62c82ee35020891b96e4034fc2387f0978bdc989df7a096d69fd",
+  "quayDigest": "sha256:738e4fb1245474d639207585c0830ad8c79ee5e06572882617eccc876a903c66"
 }
