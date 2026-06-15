@@ -65,8 +65,26 @@ RUN if [ "$(uname -m)" = "x86_64" ]; then MIRROR=ubuntu; else MIRROR=ubuntu-port
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # ttyd: web-based terminal over HTTP (aarch64).
-RUN curl -fSL https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION}/ttyd.aarch64 \
-        -o /usr/local/bin/ttyd && chmod +x /usr/local/bin/ttyd
+# Prefer a vendored binary from the build context (projects/ais-bench/vendor/);
+# fall back to downloading from GitHub / mirrors if it's absent. The vendored
+# path makes builds deterministic in networks where the BuildKit daemon can't
+# reach GitHub's TLS endpoints.
+COPY projects/ais-bench/vendor/ /tmp/ttyd-vendor/
+RUN set -e; \
+    if [ -f /tmp/ttyd-vendor/ttyd.aarch64 ]; then \
+        cp /tmp/ttyd-vendor/ttyd.aarch64 /usr/local/bin/ttyd; \
+    else \
+        for u in \
+            "https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION}/ttyd.aarch64" \
+            "https://gh-proxy.com/https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION}/ttyd.aarch64" \
+            "https://ghfast.top/https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION}/ttyd.aarch64"; do \
+            echo "Fetching ttyd from $u"; \
+            if curl -fSL --retry 5 --retry-all-errors --retry-delay 2 --connect-timeout 15 -o /usr/local/bin/ttyd "$u"; then break; fi; \
+        done; \
+    fi; \
+    test -s /usr/local/bin/ttyd; \
+    chmod +x /usr/local/bin/ttyd; \
+    rm -rf /tmp/ttyd-vendor
 
 COPY --from=builder /usr/local/lib/python3.10 /usr/local/lib/python3.10
 COPY --from=builder /usr/local/bin /usr/local/bin
