@@ -318,6 +318,18 @@ images:
     tags:
       - "quay.io/service-delivery-hub/om-serve:latest-cann83rc1-910b"
 
+  ais-bench:
+    tier: app
+    purpose: inference
+    standalone: true
+    app_type: ais-bench
+    app_name: "AIS Bench"
+    description: "LLM evaluation benchmark (OpenCompass-based) for performance testing"
+    build:
+      context: .
+      dockerfile: projects/ais-bench/Dockerfile
+    tags:
+      - "quay.io/service-delivery-hub/ais-bench:latest"
 
   yolo-ascend:
     tier: app
