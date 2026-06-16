@@ -27,3 +27,15 @@ if os.environ.get("AIS_INSECURE_SSL") == "1":
 
     aiohttp.ClientSession.__init__ = _patched_sess_init
     print("[sitecustomize] aiohttp TLS verification disabled (AIS_INSECURE_SSL=1)")
+
+# Endpoint-path override: VLLMCustomAPIChat hardcodes "v1/chat/completions".
+# Set AIS_FULL_URL to post to a different path verbatim (e.g. .../api/v2/chat/completions).
+_full_url = os.environ.get("AIS_FULL_URL")
+if _full_url:
+    from ais_bench.benchmark.models.api_models.vllm_custom_api_chat import VLLMCustomAPIChat
+
+    def _override_get_url(self):
+        return _full_url
+
+    VLLMCustomAPIChat._get_url = _override_get_url
+    print(f"[sitecustomize] chat endpoint overridden -> {_full_url}")
