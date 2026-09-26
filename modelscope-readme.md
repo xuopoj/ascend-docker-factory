@@ -69,9 +69,8 @@ CANN / torch / torch_npu 全部来自官方基础镜像，**未做任何重新�
 
 | 版本 | quay.io 标签 | 下载 |
 |------|-------------|------|
-| 0.9.5-npu-a3 | `quay.io/service-delivery-hub/llama-factory:0.9.5-npu-a3` | 暂未上传（见下方说明） |
-
-> 📦 tar.gz 离线包尚未上传至 ModelScope，请暂时使用方式一从 quay.io 拉取，或在联网机器上自行 `docker save` 后传输。
+| 0.9.5-npu-a3 | `quay.io/service-delivery-hub/llama-factory:0.9.5-npu-a3` | [llama-factory-0.9.5-npu-a3.tar.gz](llama-factory/llama-factory-0.9.5-npu-a3.tar.gz) |
+| 0.9.5-npu-a2 | `quay.io/service-delivery-hub/llama-factory:0.9.5-npu-a2` | [llama-factory-0.9.5-npu-a2.tar.gz](llama-factory/llama-factory-0.9.5-npu-a2.tar.gz) |
 
 微调配置已内置于 `/home/ma-user/llama-factory/configs/`，权重需通过只读挂载提供（镜像内设置了 `HF_HUB_OFFLINE=1`）：
 
