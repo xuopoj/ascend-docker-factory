@@ -16,8 +16,8 @@
   "chip": null,
   "cannVersion": null,
   "experimental": true,
-  "pushedAt": "2026-09-26T01:27:54.711414+00:00",
-  "modelscopeUrl": null,
+  "pushedAt": "2026-09-26T03:46:54.620420+00:00",
+  "modelscopeUrl": "https://modelscope.cn/datasets/xuopoj/service-delivery-hub/resolve/master/llama-factory/llama-factory-0.9.5-npu-a3.tar.gz",
   "sha256": "063acf75cfb652e7d37ddfeefb6927527b08c2245c18b88dc574870e989a1334",
   "quayDigest": "sha256:96f0010392f9e4d7cbc02ffa5c9e039c72810ea9ac1a7ea11c840681ea5ef9c0"
 }
