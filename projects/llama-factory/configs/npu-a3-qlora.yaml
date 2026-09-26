@@ -1,0 +1,52 @@
+### model
+# Local path into the READ-ONLY OBS mount, not a hub id: the A3 box may have no
+# route to Hugging Face, and HF_HUB_OFFLINE=1 is set in the image. Put the
+# weights at ${OBS_MODELS_DIR}/Qwen3-4B-Instruct-2507 on the bucket.
+model_name_or_path: /home/ma-user/work/models/Qwen3-4B-Instruct-2507
+quantization_bit: 4
+quantization_method: bnb
+double_quantization: false   # REQUIRED by the bitsandbytes NPU backend; deliberately absent from the CUDA configs
+trust_remote_code: true
+
+### method
+stage: sft
+do_train: true
+finetuning_type: lora
+lora_rank: 8
+lora_target: all
+
+### dataset
+# identity gives a result verifiable by eye; the alpaca demos give real
+# bilingual instruction-following. 2,090 records total.
+# dataset_dir is pinned absolutely: llamafactory-cli resolves the default
+# (`data`) against the CURRENT WORKING DIRECTORY, and the image's WORKDIR is
+# /home/ma-user, not where the datasets are baked. Without this, training
+# fails to find dataset_info.json unless you happen to cd first.
+dataset_dir: /home/ma-user/llama-factory/data
+dataset: identity,alpaca_en_demo,alpaca_zh_demo
+template: qwen3_nothink
+cutoff_len: 2048
+max_samples: 2000
+overwrite_cache: true
+preprocessing_num_workers: 16
+dataloader_num_workers: 4
+
+### output
+# Writable LOCAL disk. Never write checkpoints straight to a fuse-mounted
+# bucket: the writes are slow enough to stall a training step. Sync after.
+output_dir: /home/ma-user/output/qwen3-4b/npu-qlora/sft
+logging_steps: 10
+save_steps: 200
+plot_loss: true
+overwrite_output_dir: true
+report_to: none
+
+### train
+per_device_train_batch_size: 1
+gradient_accumulation_steps: 8
+learning_rate: 1.0e-4
+num_train_epochs: 3.0
+lr_scheduler_type: cosine
+warmup_ratio: 0.1
+bf16: true
+ddp_timeout: 180000000

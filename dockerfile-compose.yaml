@@ -383,6 +383,29 @@ images:
     tags:
       - "quay.io/service-delivery-hub/nanochat:latest-{_tag_suffix}"
 
+  llama-factory:
+    tier: app
+    purpose: training
+    # Built on the Ascend-maintained llamafactory image, not on a base from this
+    # repo — so no depends_on. Upstream owns the CANN/torch/torch_npu stack.
+    standalone: true
+    app_type: llama-factory
+    app_name: "LLaMA-Factory"
+    description: "LLaMA-Factory LLM fine-tuning (LoRA/QLoRA) with Ascend NPU support. Built on the Ascend-maintained llamafactory image; adds bitsandbytes (needed for QLoRA, absent from the base), tensorboard, a ModelArts notebook kernel, and baked-in demo datasets for offline use. NOT YET VALIDATED ON HARDWARE — the build and an offline run are verified, but no training run on a real NPU has been done."
+    # Flagged experimental so the hub listing and detail page both carry the
+    # badge: this image has never run on an Ascend device.
+    experimental: true
+    matrix:
+      - BASE_IMAGE: "quay.io/ascend/llamafactory:0.9.5-npu-a3"
+        _tag_suffix: "0.9.5-npu-a3"
+      - BASE_IMAGE: "quay.io/ascend/llamafactory:0.9.5-npu-a2"
+        _tag_suffix: "0.9.5-npu-a2"
+    build:
+      context: .
+      dockerfile: projects/llama-factory/Dockerfile
+    tags:
+      - "quay.io/service-delivery-hub/llama-factory:{_tag_suffix}"
+
   # ================= Framework-Level Tools =================
   # Note: App-specific images (YOLO, Flask, Chronos, etc.) should be built
   # manually from projects/ directory. See README.md for examples.

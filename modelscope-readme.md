@@ -53,6 +53,32 @@ tags:
 |------|-------------|------|
 | latest-torch251-cann83rc1-910b | `quay.io/service-delivery-hub/yolo-ascend:latest-torch251-cann83rc1-910b` | [yolo-ascend.tar.gz](yolo-ascend/yolo-ascend.tar.gz) |
 
+### LLaMA-Factory
+
+基于昇腾官方维护的 [llamafactory](https://quay.io/repository/ascend/llamafactory) 镜像，用于大模型微调（LoRA / QLoRA）。在官方基础镜像之上补充了：
+
+- **bitsandbytes** — QLoRA 必需，官方基础镜像中并未预装
+- **tensorboard** — 训练指标记录
+- **ModelArts notebook kernel** — 可直接作为 notebook 镜像使用
+- **内置演示数据集** — identity + alpaca 中英文（共 2,090 条），适配无外网环境
+
+> ⚠️ **尚未在真实硬件上验证 / NOT YET VALIDATED ON HARDWARE**
+> 镜像构建与离线加载已验证（数据集可在 `--network none` 下正常加载），但尚未在真实昇腾 NPU 上完成训练验证。请先在自己的设备上确认后再用于正式任务。
+
+CANN / torch / torch_npu 全部来自官方基础镜像，**未做任何重新固定版本**——官方镜像已在真实硬件上测试过，盲目重新固定版本容易得到"能 import 但看不到设备"的镜像。
+
+| 版本 | quay.io 标签 | 下载 |
+|------|-------------|------|
+| 0.9.5-npu-a3 | `quay.io/service-delivery-hub/llama-factory:0.9.5-npu-a3` | 暂未上传（见下方说明） |
+
+> 📦 tar.gz 离线包尚未上传至 ModelScope，请暂时使用方式一从 quay.io 拉取，或在联网机器上自行 `docker save` 后传输。
+
+微调配置已内置于 `/home/ma-user/llama-factory/configs/`，权重需通过只读挂载提供（镜像内设置了 `HF_HUB_OFFLINE=1`）：
+
+```bash
+llamafactory-cli train /home/ma-user/llama-factory/configs/npu-a3-lora.yaml
+```
+
 ### vLLM Ascend
 
 基于 [vllm-project/vllm-ascend](https://github.com/vllm-project/vllm-ascend) 的高性能 LLM 推理镜像，已预装网络调试工具。

@@ -6,3 +6,6 @@ arxiv
 examples.env
 
 .env
+# Image tarballs produced by build.py --save (multi-GB; uploaded to ModelScope, never committed)
+*.tar.gz
+__pycache__/

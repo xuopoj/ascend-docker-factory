@@ -1,0 +1,14 @@
+# REFERENCE ONLY: llamafactory-cli does NOT merge fragments.
+# This file exists for humans copying fields, not as an include mechanism.
+
+stage: sft
+do_train: true
+finetuning_type: lora
+lora_rank: 8
+lora_target: all
+template: qwen3_nothink
+cutoff_len: 2048
+lr_scheduler_type: cosine
+warmup_ratio: 0.1
+num_train_epochs: 3.0
+learning_rate: 1.0e-4

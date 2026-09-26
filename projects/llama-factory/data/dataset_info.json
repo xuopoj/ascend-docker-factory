@@ -1,0 +1,14 @@
+{
+  "identity": {
+    "file_name": "identity.json",
+    "columns": { "prompt": "instruction", "query": "input", "response": "output" }
+  },
+  "alpaca_en_demo": {
+    "file_name": "alpaca_en_demo.json",
+    "columns": { "prompt": "instruction", "query": "input", "response": "output" }
+  },
+  "alpaca_zh_demo": {
+    "file_name": "alpaca_zh_demo.json",
+    "columns": { "prompt": "instruction", "query": "input", "response": "output" }
+  }
+}
